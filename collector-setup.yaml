@@ -1,0 +1,17 @@
+---
+###
+### Install syslog-ng
+###
+
+- name:       "Configure SecureOPS log collector"
+  hosts:      localhost
+  connection: local  
+  become: yes
+
+  tasks:  
+    - fail:
+        msg: "not supported" 
+      when: ( ansible_distribution not in ['Ubuntu','Debian'] )
+      
+      
+    - import_tasks: "tasks/syslog-ng.yaml"
