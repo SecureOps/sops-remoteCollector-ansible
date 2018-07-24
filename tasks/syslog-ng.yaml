@@ -3,21 +3,12 @@
 ### Install syslog-ng
 ###
 
-- name:   "Install syslog-ng"
-  hostsL  all
-  become: yes
-
-  tasks:  
-    - fail:
-        msg: "not supported" 
-      when: ( ansible_distribution not in ['Ubuntu','Debian'] )
-    
-    - name: "Install Syslog-NG"
-      apt: 
-        name:  ["syslog-ng"]
-        state: "installed"
-    #  notify:
-    #    - "Restart logstash"
+- name: "Install Syslog-NG"
+  apt: 
+    name:  ["syslog-ng"]
+    state: "installed"
+  #notify:
+  #  - "Restart logstash"
 
 ##    - file: 
 ##        path:  "/data/logstash"
