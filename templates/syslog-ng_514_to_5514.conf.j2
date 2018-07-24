@@ -1,13 +1,13 @@
 
 source s_net {
-    newtork(
+    network(
       ip(0.0.0.0)
       transport("tcp")
       port(514)
       time-zone("UTC")
     );
     
-    newtork(
+    network(
       ip(0.0.0.0)
       transport("udp")
       port(514)
@@ -16,7 +16,7 @@ source s_net {
 };
 
 destination dn_local_tool { 
-   newtork(
+   network(
       ip("localhost")
       transport("tcp")
       port(5514)
