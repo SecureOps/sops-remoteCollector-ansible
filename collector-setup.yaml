@@ -15,3 +15,6 @@
       
     - import_tasks: "tasks/syslog-ng.yaml"
     - import_tasks: "tasks/fluentd.yaml"
+    
+  handlers:
+    - import_tasks: "tasks/handlers.yaml"
