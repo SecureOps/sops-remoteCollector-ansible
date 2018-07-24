@@ -3,7 +3,8 @@
 ### Install syslog-ng
 ###
 
-- name:   Install syslog-ng
+- name:   "Install syslog-ng"
+  hostsL  all
   become: yes
 
   tasks:  
