@@ -1,0 +1,85 @@
+###
+### SOURCES
+###
+# Beats source (TCP/5044)
+<source>
+  @type beats
+  tag beats
+</source>
+
+# Syslog sources (TCP/UDP/5514)
+<source>
+  @type syslog
+  tag syslog.udp
+  port 5514
+  protocol_type udp
+</source>
+<source>
+  @type syslog
+  tag syslog.tcp
+  port 5514
+  protocol_type tcp
+</source>
+
+# Netflows (UDP/2055)
+<source>
+  @type netflow
+  tag netflow.event
+  port 2055
+  definitions /etc/td-agent/plugin/netflow.yml
+</source>
+
+
+###
+### FILTERS
+###
+# Inject flluent headers into JSON
+<filter netflow.* syslog.** filebeat metricbeat winlogbeat>
+  @type record_transformer
+  enable_ruby true
+  <record>
+    soc_tag ${tag}
+    soc_hostname ${hostname}
+    soc_timestamp ${time.utc.to_i}
+    soc_customer_tag {{ ansible_local.sops.customer_info.name }}
+  </record>
+</filter>
+
+# Add UUID
+<filter syslog.** beats.**>
+  @type adduuid
+  key fluentd_recordid
+</filter>
+
+###
+### OUTPUTS
+###
+<match syslog.** beats.**>
+  @type copy
+  <store>
+    @type kinesis_streams
+    region us-east-1
+    aws_key_id <AWS KEY>
+    aws_sec_key <AWS SECRET>
+    stream_name <target kinesis stream>
+    debug false
+    <format>
+      @type json
+      add_newline true
+    </format>
+    flush_interval 30s
+  </store>
+  <store>
+    @type file
+    path /opt/logs/fluentd/${tag}/%Y/%m/%d/${tag}-%H%M.log
+    <format>
+      @type json
+    </format>
+    <buffer tag,time>
+      @type file
+      path /opt/buffer
+      timekey 5m
+      timekey_wait 1m
+    </buffer>
+  </store>
+</match>

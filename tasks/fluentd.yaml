@@ -7,21 +7,49 @@
   apt: 
     name:  ["td-agent"]
     state: "latest"
-  #notify:
-  #  - "Restart logstash"
+  notify:
+    - "Restart td-agent"
 
-##    - file: 
-##        path:  "/data/logstash"
-##        owner: "logstash"
-##        group: "logstash"
-##        state: "directory"
-##
-##    - template:
-##        src:  "templates/logstash.yml.j2"
-##        dest: "/etc/logstash/logstash.yml"
-##        mode: "0444"
-##      notify: ["Restart logstash"]
-##      
+- file: 
+    path:  "/opt/fluentd/logs"
+    owner: "td-agent"
+    group: "td-agent"
+    state: "directory"
+
+- file: 
+    path:  "/opt/fluentd/buffer"
+    owner: "td-agent"
+    group: "td-agent"
+    state: "directory"
+
+- gem:
+    name: fluent-plugin-beats
+    state: latest
+  notify:
+    - "Restart td-agent"
+
+- gem:
+    name: fluent-plugin-kinesis
+    state: latest
+  notify:
+    - "Restart td-agent"
+
+- template:
+    src:  "fluentd_td-agent.conf.j2"
+    dest: "/etc/td-agent/td-agent.conf"
+    mode: "0444"
+  notify:
+    - "Restart td-agent"
+
+- template:
+    src:  "fluentd_netflow_defintions.yml.j2"
+    dest: "/etc/td-agent/plugin/netflow.yml"
+    mode: "0444"
+  notify:
+    - "Restart td-agent"
+
+
+    ##      
 ##    - template:
 ##        src:  "templates/logstash_pipeline.conf.j2"
 ##        dest: "/etc/logstash/conf.d/pipeline.conf"
