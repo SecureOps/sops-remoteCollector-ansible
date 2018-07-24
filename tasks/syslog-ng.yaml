@@ -17,15 +17,7 @@
   notify: 
     - "Restart syslog-ng"
 
-##      
-##    - template:
-##        src:  "templates/logstash_pipeline.conf.j2"
-##        dest: "/etc/logstash/conf.d/pipeline.conf"
-##        mode: "0444"
-##      notify: ["Restart logstash"]
-##
-##    - service: 
-##        name:    "logstash"
-##        state:   "started"
-##        enabled: "yes"
-##
+- service: 
+    name:    "syslog-ng"
+    state:   "started"
+    enabled: "true"
