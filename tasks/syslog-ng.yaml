@@ -6,7 +6,7 @@
 - name: "Install Syslog-NG"
   apt: 
     name:  ["syslog-ng"]
-    state: "installed"
+    state: "latest"
   #notify:
   #  - "Restart logstash"
 
