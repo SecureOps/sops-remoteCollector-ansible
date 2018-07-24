@@ -5,13 +5,13 @@
 
 - name:       "Configure SecureOPS log collector"
   hosts:      localhost
-  connection: local  
+  connection: local
   become: yes
 
   tasks:  
     - fail:
         msg: "not supported" 
-      when: ( ansible_distribution not in ['Ubuntu','Debian'] )
-      
+      when: ( ansible_distribution not in ['Ubuntu','Debian'] )      
       
     - import_tasks: "tasks/syslog-ng.yaml"
+    - import_tasks: "tasks/fluentd.yaml"
