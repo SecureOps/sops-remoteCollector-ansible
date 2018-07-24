@@ -22,3 +22,10 @@ destination dn_local_tool {
       port(5514)
   );
 };
+
+log {
+  source(s_net) ;
+  #filter(f_xxx) ;
+  destination(dn_local_tool) ;
+} ;
+
