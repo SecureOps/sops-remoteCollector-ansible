@@ -23,10 +23,8 @@
     group: "td-agent"
     state: "directory"
 
-- gem:
-    name: "{{ item }}"
-    state: "latest" 
-    executable: "/usr/sbin/td-agent-gem" 
+- name: "Install required fluent plugins... " 
+  shell: "/usr/sbin/td-agent-gem install {{ item }}" 
   loop:
     - "fluent-plugin-kinesis"
     - "fluent-plugin-beats"
