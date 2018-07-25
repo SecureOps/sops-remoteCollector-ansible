@@ -17,7 +17,7 @@
       when: ( ansible_distribution not in ['Ubuntu','Debian'] )
     
     - apt: 
-        name:  ["python-minimal", "git", "ansible", "ruby", "ruby-dev", "build-essential"]
+        name:  ["python-minimal", "git", "ansible", "build-essential"]
         state: "latest"
     
     - import_tasks: "tasks/syslog-ng.yaml"

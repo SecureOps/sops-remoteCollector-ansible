@@ -24,15 +24,26 @@
     state: "directory"
 
 - gem:
-    name:  "fluent-plugin-beats"
-    state: "latest"
+    name:       "fluent-plugin-kinesis" 
+    state:      "latest" 
+    executable: "/opt/td-agent/embedded/bin/gem"
+    
   retries: 3
   notify:
     - "Restart td-agent"
 
 - gem:
-    name:  "fluent-plugin-kinesis" 
-    state: "latest" 
+    name:       "fluent-plugin-beats"
+    state:      "latest"
+    executable: "/opt/td-agent/embedded/bin/gem" 
+  retries: 3
+  notify:
+    - "Restart td-agent"
+
+- gem:
+    name:       "fluent-plugin-add-uuid" 
+    state:      "latest" 
+    executable: "/opt/td-agent/embedded/bin/gem"
   retries: 3
   notify:
     - "Restart td-agent"
@@ -51,21 +62,3 @@
   notify:
     - "Restart td-agent"
 
-
-    ##      
-##    - template:
-##        src:  "templates/logstash_pipeline.conf.j2"
-##        dest: "/etc/logstash/conf.d/pipeline.conf"
-##        mode: "0444"
-##      notify: ["Restart logstash"]
-##
-##    - service: 
-##        name:    "logstash"
-##        state:   "started"
-##        enabled: "yes"
-##
-##  handlers:
-##    - name: "Restart logstash"
-##      service: 
-##        name:  "logstash"
-##        state: "restarted"
