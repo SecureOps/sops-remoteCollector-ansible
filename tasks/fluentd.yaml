@@ -7,6 +7,7 @@
   apt: 
     name:  ["td-agent"]
     state: "latest"
+  retries: 3
   notify:
     - "Restart td-agent"
 
@@ -23,14 +24,16 @@
     state: "directory"
 
 - gem:
-    name: fluent-plugin-beats
-    state: latest
+    name:  "fluent-plugin-beats"
+    state: "latest"
+  retries: 3
   notify:
     - "Restart td-agent"
 
 - gem:
-    name: fluent-plugin-kinesis
-    state: latest
+    name:  "fluent-plugin-kinesis" 
+    state: "latest" 
+  retries: 3
   notify:
     - "Restart td-agent"
 

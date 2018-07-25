@@ -5,8 +5,9 @@
 
 - name: "Install Syslog-NG"
   apt: 
-    name:  ["syslog-ng"]
+    name:  "syslog-ng"
     state: "latest"
+  retries: 3
   notify:
     - "Restart syslog-ng"
 

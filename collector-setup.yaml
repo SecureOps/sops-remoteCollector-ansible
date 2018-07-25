@@ -8,6 +8,9 @@
   connection: local
   become: yes
 
+  environment:
+    HOME: "/root" 
+
   tasks:  
     - fail:
         msg: "not supported" 
