@@ -41,7 +41,7 @@
     soc_tag ${tag}
     soc_hostname ${hostname}
     soc_timestamp ${time.utc.to_i}
-    soc_customer_tag {{ ansible_local.sops.customer_info.name }}
+    soc_customer_tag {{ ansible_local.secureops.customer_info.name }}
   </record>
 </filter>
 
