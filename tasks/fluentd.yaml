@@ -24,26 +24,9 @@
     state: "directory"
 
 - gem:
-    name:       "fluent-plugin-kinesis" 
+    name:       ["fluent-plugin-kinesis", "fluent-plugin-beats", "fluent-plugin-add-uuid"]
     state:      "latest" 
-    executable: "/opt/td-agent/embedded/bin/gem"
-    
-  retries: 3
-  notify:
-    - "Restart td-agent"
-
-- gem:
-    name:       "fluent-plugin-beats"
-    state:      "latest"
-    executable: "/opt/td-agent/embedded/bin/gem" 
-  retries: 3
-  notify:
-    - "Restart td-agent"
-
-- gem:
-    name:       "fluent-plugin-add-uuid" 
-    state:      "latest" 
-    executable: "/opt/td-agent/embedded/bin/gem"
+    executable: "/usr/sbin/td-agent-gem" 
   retries: 3
   notify:
     - "Restart td-agent"
