@@ -8,8 +8,8 @@
   connection: local
   become: yes
 
-  environment:
-    HOME: "/root" 
+#  environment:
+#    HOME: "/root" 
 
   tasks:  
     - fail:
