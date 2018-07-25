@@ -24,13 +24,14 @@
     state: "directory"
 
 - gem:
-    name:
-      - "fluent-plugin-kinesis"
-      - "fluent-plugin-beats"
-      - "fluent-plugin-add-uuid"
-      - "fluent-plugin-netflow"
+    name: "{{item }}"
     state:      "latest" 
     executable: "/usr/sbin/td-agent-gem" 
+  loop:
+    - "fluent-plugin-kinesis"
+    - "fluent-plugin-beats"
+    - "fluent-plugin-add-uuid"
+    - "fluent-plugin-netflow" 
   retries: 3
   notify:
     - "Restart td-agent"
