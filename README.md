@@ -1,4 +1,4 @@
-# sops-collector-ansible
+# sops-remoteCollector-ansible
 Ansible Playbooks to configure Log Collector
 
 
