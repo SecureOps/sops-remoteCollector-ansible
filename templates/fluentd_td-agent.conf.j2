@@ -34,7 +34,7 @@
 ### FILTERS
 ###
 # Inject flluent headers into JSON
-<filter netflow.* syslog.** filebeat metricbeat winlogbeat>
+<filter netflow.* syslog.** filebeat.** metricbeat.** winlogbeat.**>
   @type record_transformer
   enable_ruby true
   <record>
@@ -45,7 +45,7 @@
   </record>
 </filter>
 
-<filter netflow.* syslog.** metricbeat filebeat winlogbeat>
+<filter netflow.* syslog.** metricbeat.** filebeat.** winlogbeat.**>
   @type adduuid
   key soc_recordid
 </filter>
@@ -54,9 +54,9 @@
 ###
 ### OUTPUTS
 ###
-{% for output in ['syslog.**', 'netflow.*', 'filebeat', 'winlogbeat', 'metricbeat'] %}
+{% for output in ['syslog', 'netflow', 'filebeat', 'winlogbeat', 'metricbeat'] %}
 
-<match {{ output }}>
+<match {{ output }}.**>
   @type copy
   <store>
     @type kinesis_streams
