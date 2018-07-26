@@ -73,7 +73,8 @@
   </store>
   <store>
     @type file
-    path /opt/fluentd/logs/%Y/%m/%d/${tag}-%H%M.log
+    #path /opt/fluentd/logs/%Y/%m/%d/${tag}-%H%M.log
+    path /opt/fluentd/logs/%Y/%m/%d/{{ output }}-%H%M.log
     compress gzip
     <format>
       @type json
