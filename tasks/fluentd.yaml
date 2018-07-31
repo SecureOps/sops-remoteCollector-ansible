@@ -25,13 +25,15 @@
 
 ## Install fluentd plygins
 - shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-kinesis"
-  register: shell_result  
+  ignore_errors: "yes"
+  register: shell_result   
 - name: "Install fluent-plugin-kinesis fluent plugins... " 
   shell: "/usr/sbin/td-agent-gem install fluent-plugin-kinesis"
   when:  ( shell_result.rc != 0 )
   retries: 3
 
 - shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-beats"
+  ignore_errors: "yes"
   register: shell_result  
 - name: "Install fluent-plugin-beats fluent plugins... " 
   shell: "/usr/sbin/td-agent-gem install fluent-plugin-beats"
@@ -39,6 +41,7 @@
   retries: 3
 
 - shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-add-uuid"
+  ignore_errors: "yes"
   register: shell_result  
 - name: "Install fluent-plugin-add-uuid fluent plugins... " 
   shell: "/usr/sbin/td-agent-gem install fluent-plugin-add-uuid"
@@ -46,6 +49,7 @@
   retries: 3
 
 - shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-netflow"
+  ignore_errors: "yes"
   register: shell_result  
 - name: "Install fluent-plugin-netflow fluent plugins... " 
   shell: "/usr/sbin/td-agent-gem install fluent-plugin-netflow"
