@@ -23,16 +23,44 @@
     group: "td-agent"
     state: "directory"
 
-- name: "Install required fluent plugins... " 
-  shell: "/usr/sbin/td-agent-gem install {{ item }}" 
-  loop:
-    - "fluent-plugin-kinesis"
-    - "fluent-plugin-beats"
-    - "fluent-plugin-add-uuid"
-    - "fluent-plugin-netflow" 
+## Install fluentd plygins
+- shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-kinesis"
+  register: shell_result  
+- name: "Install fluent-plugin-kinesis fluent plugins... " 
+  shell: "/usr/sbin/td-agent-gem install fluent-plugin-kinesis"
+  when:  ( shell_result.rc != 0 )
   retries: 3
   notify:
     - "Restart td-agent"
+
+- shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-beats"
+  register: shell_result  
+- name: "Install fluent-plugin-beats fluent plugins... " 
+  shell: "/usr/sbin/td-agent-gem install fluent-plugin-beats"
+  when:  ( shell_result.rc != 0 )
+  retries: 3
+  notify:
+    - "Restart td-agent"
+
+- shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-add-uuid"
+  register: shell_result  
+- name: "Install fluent-plugin-add-uuid fluent plugins... " 
+  shell: "/usr/sbin/td-agent-gem install fluent-plugin-add-uuid"
+  when:  ( shell_result.rc != 0 )
+  retries: 3
+  notify:
+    - "Restart td-agent"
+
+- shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-netflow"
+  register: shell_result  
+- name: "Install fluent-plugin-netflow fluent plugins... " 
+  shell: "/usr/sbin/td-agent-gem install fluent-plugin-netflow"
+  when:  ( shell_result.rc != 0 )
+  retries: 3
+  notify:
+    - "Restart td-agent"
+
+
 
 - template:
     src:  "fluentd_td-agent.conf.j2"

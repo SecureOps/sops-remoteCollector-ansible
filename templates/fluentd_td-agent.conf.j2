@@ -63,7 +63,7 @@
     region      {{ ansible_local.secureops.customer_info.aws_region }}
     aws_key_id  {{ ansible_local.secureops.customer_info.aws_key_id }}
     aws_sec_key {{ ansible_local.secureops.customer_info.aws_sec_key }}
-    stream_name logs-{{ ansible_local.secureops.customer_info.name }}-{{ ansible_local.secureops.customer_info.aws_region }}-{{ output }}
+    stream_name sopsCustomerlogs-{{ ansible_local.secureops.customer_info.name }}-{{ ansible_local.secureops.customer_info.aws_region }}-{{ output }}
     debug false
     <format>
       @type json
