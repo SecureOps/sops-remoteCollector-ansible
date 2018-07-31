@@ -23,7 +23,11 @@
     group: "td-agent"
     state: "directory"
 
-## Install fluentd plygins
+#######
+#######
+## Install fluentd plugins
+## * We are using shell because ansible "gem' module doesn't work well with fluent provided ruby/gem.
+##
 - shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-kinesis"
   ignore_errors: "yes"
   register: shell_result   
@@ -55,8 +59,11 @@
   shell: "/usr/sbin/td-agent-gem install fluent-plugin-netflow"
   when:  ( shell_result.rc != 0 )
   retries: 3
-
-
+##
+##
+##
+######
+######
 
 - template:
     src:  "fluentd_td-agent.conf.j2"
