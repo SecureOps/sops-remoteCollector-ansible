@@ -30,8 +30,6 @@
   shell: "/usr/sbin/td-agent-gem install fluent-plugin-kinesis"
   when:  ( shell_result.rc != 0 )
   retries: 3
-  notify:
-    - "Restart td-agent"
 
 - shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-beats"
   register: shell_result  
@@ -39,8 +37,6 @@
   shell: "/usr/sbin/td-agent-gem install fluent-plugin-beats"
   when:  ( shell_result.rc != 0 )
   retries: 3
-  notify:
-    - "Restart td-agent"
 
 - shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-add-uuid"
   register: shell_result  
@@ -48,8 +44,6 @@
   shell: "/usr/sbin/td-agent-gem install fluent-plugin-add-uuid"
   when:  ( shell_result.rc != 0 )
   retries: 3
-  notify:
-    - "Restart td-agent"
 
 - shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-netflow"
   register: shell_result  
@@ -57,8 +51,6 @@
   shell: "/usr/sbin/td-agent-gem install fluent-plugin-netflow"
   when:  ( shell_result.rc != 0 )
   retries: 3
-  notify:
-    - "Restart td-agent"
 
 
 
