@@ -33,8 +33,8 @@
                                 "kinesis:DescribeStream"
                             ],
                             "Resource": [ 
-                                {"Fn::Join": ["-", ["arn:aws:kinesis:*:*:stream/logs", {"Ref": "CustomerName"} ] ] },
-                                {"Fn::Join": ["-", ["arn:aws:firehose:*:*:deliverystream/logs", {"Ref": "CustomerName"} ] ] }
+                                {"Fn::Join": ["", ["arn:aws:kinesis:*:*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
+                                {"Fn::Join": ["", ["arn:aws:firehose:*:*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] }
                              ]
                         } ]
                     }
@@ -56,7 +56,7 @@
             "Type": "AWS::Kinesis::Stream",
             "DependsOn": "sopsUser",
             "Properties": {
-                "Name" : {"Fn::Join": ["-", ["logs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "syslog" ] ] },
+                "Name" : {"Fn::Join": ["-", ["sopsCustomerLogs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "syslog" ] ] },
                 "RetentionPeriodHours" : 24,
                 "ShardCount" : 1,
                 "Tags" : [ 
@@ -70,7 +70,7 @@
             "Type": "AWS::Kinesis::Stream",
             "DependsOn": "sopsUser",
             "Properties": {
-                "Name" : {"Fn::Join": ["-", ["logs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "filebeat" ] ] },
+                "Name" : {"Fn::Join": ["-", ["sopsCustomerLogs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "filebeat" ] ] },
                 "RetentionPeriodHours" : 24,
                 "ShardCount" : 1,
                 "Tags" : [ 
@@ -84,7 +84,7 @@
             "Type": "AWS::Kinesis::Stream",
             "DependsOn": "sopsUser",
             "Properties": {
-                "Name" : {"Fn::Join": ["-", ["logs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "metricbeat" ] ] },
+                "Name" : {"Fn::Join": ["-", ["sopsCustomerLogs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "metricbeat" ] ] },
                 "RetentionPeriodHours" : 24,
                 "ShardCount" : 1,
                 "Tags" : [ 
@@ -98,7 +98,7 @@
             "Type": "AWS::Kinesis::Stream",
             "DependsOn": "sopsUser",
             "Properties": {
-                "Name" : {"Fn::Join": ["-", ["logs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "winlogbeat" ] ] },
+                "Name" : {"Fn::Join": ["-", ["sopsCustomerLogs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "winlogbeat" ] ] },
                 "RetentionPeriodHours" : 24,
                 "ShardCount" : 1,
                 "Tags" : [ 
@@ -112,7 +112,7 @@
             "Type": "AWS::Kinesis::Stream",
             "DependsOn": "sopsUser",
             "Properties": {
-                "Name" : {"Fn::Join": ["-", ["logs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "netflow" ] ] },
+                "Name" : {"Fn::Join": ["-", ["sopsCustomerLogs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "netflow" ] ] },
                 "RetentionPeriodHours" : 24,
                 "ShardCount" : 1,
                 "Tags" : [ 
@@ -122,11 +122,16 @@
             }
         },
 
-        "deliverystream": {
+        "sopsCustomerKinesisDeliverystreamSyslog": {
             "DependsOn": ["deliveryPolicy"],
             "Type": "AWS::KinesisFirehose::DeliveryStream",
             "Properties": {
-                "DeliveryStreamName": {"Fn::Join": ["-", ["sopsCustomerDeliveryStream", {"Ref": "CustomerName"}, "syslog" ] ] },  
+                "DeliveryStreamName": {"Fn::Join": ["-", ["sopsCustomerDeliveryStream", {"Ref": "CustomerName"}, "syslog" ] ] }, 
+                "DeliveryStreamType": "KinesisStreamAsSource",
+                "KinesisStreamSourceConfiguration": {
+                    "KinesisStreamARN": {"Fn::GetAtt": ["sopsCustomerKinesisStreamSyslog", "Arn"]},
+                    "RoleARN": {"Fn::GetAtt" : ["deliveryRole", "Arn"] }
+                },
                 "ExtendedS3DestinationConfiguration": {
                     "BucketARN": {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"} ] ] },
                     "BufferingHints": {
@@ -135,6 +140,98 @@
                     },
                     "CompressionFormat": "GZIP",
                     "Prefix": "logs/syslog",
+                    "RoleARN": {"Fn::GetAtt" : ["deliveryRole", "Arn"] }
+                }
+            }
+        },
+        
+        "sopsCustomerKinesisDeliverystreamFileBeat": {
+            "DependsOn": ["deliveryPolicy"],
+            "Type": "AWS::KinesisFirehose::DeliveryStream",
+            "Properties": {
+                "DeliveryStreamName": {"Fn::Join": ["-", ["sopsCustomerDeliveryStream", {"Ref": "CustomerName"}, "filebeat" ] ] }, 
+                "DeliveryStreamType": "KinesisStreamAsSource",
+                "KinesisStreamSourceConfiguration": {
+                    "KinesisStreamARN": {"Fn::GetAtt": ["sopsCustomerKinesisStreamFilebeat", "Arn"]},
+                    "RoleARN": {"Fn::GetAtt" : ["deliveryRole", "Arn"] }
+                },
+                "ExtendedS3DestinationConfiguration": {
+                    "BucketARN": {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"} ] ] },
+                    "BufferingHints": {
+                        "IntervalInSeconds": "60",
+                        "SizeInMBs": "50"
+                    },
+                    "CompressionFormat": "GZIP",
+                    "Prefix": "logs/filebeat",
+                    "RoleARN": {"Fn::GetAtt" : ["deliveryRole", "Arn"] }
+                }
+            }
+        },
+    
+        "sopsCustomerKinesisDeliverystreamMetricbeat": {
+            "DependsOn": ["deliveryPolicy"],
+            "Type": "AWS::KinesisFirehose::DeliveryStream",
+            "Properties": {
+                "DeliveryStreamName": {"Fn::Join": ["-", ["sopsCustomerDeliveryStream", {"Ref": "CustomerName"}, "metricbeat" ] ] }, 
+                "DeliveryStreamType": "KinesisStreamAsSource",
+                "KinesisStreamSourceConfiguration": {
+                    "KinesisStreamARN": {"Fn::GetAtt": ["sopsCustomerKinesisStreamFilebeat", "Arn"]},
+                    "RoleARN": {"Fn::GetAtt" : ["deliveryRole", "Arn"] }
+                },
+                "ExtendedS3DestinationConfiguration": {
+                    "BucketARN": {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"} ] ] },
+                    "BufferingHints": {
+                        "IntervalInSeconds": "60",
+                        "SizeInMBs": "50"
+                    },
+                    "CompressionFormat": "GZIP",
+                    "Prefix": "logs/metricbeat",
+                    "RoleARN": {"Fn::GetAtt" : ["deliveryRole", "Arn"] }
+                }
+            }
+        },
+    
+        "sopsCustomerKinesisDeliverystreamWinlogbeat": {
+            "DependsOn": ["deliveryPolicy"],
+            "Type": "AWS::KinesisFirehose::DeliveryStream",
+            "Properties": {
+                "DeliveryStreamName": {"Fn::Join": ["-", ["sopsCustomerDeliveryStream", {"Ref": "CustomerName"}, "winlogbeat" ] ] }, 
+                "DeliveryStreamType": "KinesisStreamAsSource",
+                "KinesisStreamSourceConfiguration": {
+                    "KinesisStreamARN": {"Fn::GetAtt": ["sopsCustomerKinesisStreamWinlogbeat", "Arn"]},
+                    "RoleARN": {"Fn::GetAtt" : ["deliveryRole", "Arn"] }
+                },
+                "ExtendedS3DestinationConfiguration": {
+                    "BucketARN": {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"} ] ] },
+                    "BufferingHints": {
+                        "IntervalInSeconds": "60",
+                        "SizeInMBs": "50"
+                    },
+                    "CompressionFormat": "GZIP",
+                    "Prefix": "logs/winlogbeat",
+                    "RoleARN": {"Fn::GetAtt" : ["deliveryRole", "Arn"] }
+                }
+            }
+        },
+    
+        "sopsCustomerKinesisDeliverystreamNetflow": {
+            "DependsOn": ["deliveryPolicy"],
+            "Type": "AWS::KinesisFirehose::DeliveryStream",
+            "Properties": {
+                "DeliveryStreamName": {"Fn::Join": ["-", ["sopsCustomerDeliveryStream", {"Ref": "CustomerName"}, "netflow" ] ] }, 
+                "DeliveryStreamType": "KinesisStreamAsSource",
+                "KinesisStreamSourceConfiguration": {
+                    "KinesisStreamARN": {"Fn::GetAtt": ["sopsCustomerKinesisStreamNetflow", "Arn"]},
+                    "RoleARN": {"Fn::GetAtt" : ["deliveryRole", "Arn"] }
+                },
+                "ExtendedS3DestinationConfiguration": {
+                    "BucketARN": {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"} ] ] },
+                    "BufferingHints": {
+                        "IntervalInSeconds": "60",
+                        "SizeInMBs": "50"
+                    },
+                    "CompressionFormat": "GZIP",
+                    "Prefix": "logs/netflow",
                     "RoleARN": {"Fn::GetAtt" : ["deliveryRole", "Arn"] }
                 }
             }
@@ -171,6 +268,7 @@
         
         "deliveryPolicy": {
             "Type": "AWS::IAM::Policy",
+            "DependsOn": ["sopsUser", "s3bucket"],
             "Properties": {
                 "PolicyName": {"Fn::Join": ["-", ["sopsCustomerDeliveryPolicy", {"Ref": "CustomerName"} ] ] },
                 "Roles": [{"Ref": "deliveryRole"}], 
@@ -184,11 +282,18 @@
                             "s3:GetObject",
                             "s3:ListBucket",
                             "s3:ListBucketMultipartUploads",
-                            "s3:PutObject"
+                            "s3:PutObject",
+                            "kinesis:DescribeStream",
+                            "kinesis:GetShardIterator",
+                            "kinesis:GetRecords",
+                            "kinesis:DescribeStream",
+                            "logs:PutLogEvents"
                         ],
                         "Resource": [
                             {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"} ] ] },
-                            {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"}, "*" ] ] }
+                            {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"}, "*" ] ] },
+                            {"Fn::Join": ["", ["arn:aws:kinesis:*:*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
+                            {"Fn::Join": ["", ["arn:aws:firehose:*:*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] }
                         ]
                     } ]
                 }
@@ -198,10 +303,10 @@
     },
     
     "Outputs": { 
-        "TestKeyId": { 
+        "CustomerKeyId": { 
             "Value": {"Ref": "sopsUserKey"}
         },
-        "TestKey": {
+        "CustomerKey": {
             "Value": {"Fn::GetAtt" : ["sopsUserKey", "SecretAccessKey"] } 
         }
     }
