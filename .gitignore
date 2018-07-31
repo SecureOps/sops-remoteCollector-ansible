@@ -1,0 +1,5 @@
+roles/
+!roles/requirements.yaml
+!roles/requirements.yml
+*.retry
+vars.sh
