@@ -5,13 +5,20 @@ CUSTOMER_NAME="${CUSTOMER_NAME:-testClient}"
 CUSTOMER_PATH="/sops/customers/${CUSTOMER_NAME}/"
 
 ## LOAD customer user access key
-#AWS_KEY_ID=$(  cat sopsCustomer-${CUSTOMER_NAME}_key.json | jq -r '.AccessKey.AccessKeyId' )
-#AWS_SEC_KEY=$( cat sopsCustomer-${CUSTOMER_NAME}_key.json | jq -r '.AccessKey.SecretAccessKey' )
-AWS_KEY_ID="CHANGE_ME"
-AWS_SEC_KEY="CHANGE_ME"
+AWS_KEY_ID=$(  aws cloudformation describe-stacks --stack-name ${CUSTOMER_NAME}Stack | jq -r '.Stacks[0].Outputs[] | select( .OutputKey == "CustomerKeyId") | .OutputValue' )
+AWS_SEC_KEY=$( aws cloudformation describe-stacks --stack-name ${CUSTOMER_NAME}Stack | jq -r '.Stacks[0].Outputs[] | select( .OutputKey == "CustomerKey")   | .OutputValue' )
 
 
 INITIAL_USER_NAME="<foo>"
 INITIAL_USER_GECOS="<bar>"
 INITIAL_USER_SSH_KEY="<foo bar ssh public key>"
+
+
+
+## Collector VM Network information (Comment for DHCP)
+MAC_ADDR="x.x.x.x"
+IP_CIDR="x.x.x.x/y"
+GATEWAY="x.x.x.x"
+NAMESERVER[0]="a.a.a.a"
+NAMESERVER[1]="a.a.a.a"
 
