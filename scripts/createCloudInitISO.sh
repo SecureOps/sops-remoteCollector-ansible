@@ -17,12 +17,13 @@ ANSIBLE_PULL_PLAYBOOK="collector-setup.yaml"
 # Phone Home Url, it's called when cloud-init is finished
 PHONE_HOME_URL="https://repository.redlabnet.com/"
 
-#Set randow root password 
+#Set random root password 
 ROOT_PWD="$( pwgen 20 -1 )"
+#ROOT_PWD="root"
 
+# Temporary dir for cloud-init ISO creation
 TMPDIR="iso_temp_dir"
-
-
+rm -rf "${TMPDIR}"
 mkdir -p "${TMPDIR}"
 
 cat <<EOF > "${TMPDIR}/user-data"
@@ -36,7 +37,7 @@ growpart:
   mode: auto
   devices: ['/']
   ignore_growroot_disabled: false
-  
+
 users:
   - name: ${INITIAL_USER_NAME}
     gecos: ${INITIAL_USER_GECOS}
@@ -48,10 +49,10 @@ users:
       - ${INITIAL_USER_SSH_KEY}
 
 
-chpasswd:
-  list: |
-    root:${ROOT_PWD}
-  expire: False
+#chpasswd:
+#  list: |
+#    root:${ROOT_PWD}
+#  expire: False
 
 apt:
   sources:
@@ -148,15 +149,6 @@ apt:
         -----END PGP PUBLIC KEY BLOCK-----
 
 
-#package_upgrade: True
-
-packages:
-  - python-minimal
-  - git
-  - ansible
-  - build-essential
-
-
 write_files:
   - path: /etc/ansible/facts.d/secureops.fact
     content: |
@@ -165,6 +157,17 @@ write_files:
      aws_region=${AWS_REGION}
      aws_key_id=${AWS_KEY_ID}
      aws_sec_key=${AWS_SEC_KEY}
+
+
+
+
+#package_upgrade: True
+
+packages:
+  - python-minimal
+  - git
+  - ansible
+  - build-essential
 
 runcmd:
   - ansible-pull  -U ${ANSIBLE_PULL_URL} ${ANSIBLE_PULL_PLAYBOOK}
@@ -182,13 +185,42 @@ local-hostname: ${TARGET_HOSTNAME}
 EOF
 
 
+set +u
+## Generate network-config file if all network info have been provided
+##   * The default behaviour is DHCP on the first NIC.
+if [[ "${MAC_ADDR}" != "" ]] &&  
+   [[ "${IP_CIDR}" != "" ]] && 
+   [[ "${GATEWAY}" != "" ]] && 
+   [[ "${NAMESERVER[0]}" != "" ]] && 
+   [[ "${NAMESERVER[1]}" != "" ]] 
+then
+    cat <<EOF > "${TMPDIR}/network-config"
+version: 2
+ethernets:
+  id0:
+    match:
+      macaddress: "${MAC_ADDR}"
+    addresses:
+      - ${IP_CIDR}
+    gateway4: ${GATEWAY}
+    nameservers:
+      addresses: 
+        - ${NAMESERVER[0]}
+        - ${NAMESERVER[1]}
+
+EOF
+fi
+set -u
+
+
 # generate the seed images
 genisoimage -output ${CUSTOMER_NAME}-ci-img.iso -volid cidata -joliet -rock ${TMPDIR}/
+#cloud-localds -v --network-config=${TMPDIR}/network-config ${CUSTOMER_NAME}-ci-img.iso ${TMPDIR}/user-data ${TMPDIR}/meta-data 
 
 # for vfat
 #truncate --size 2M seed-vfat.img
 #mkfs.vfat -n cidata seed-vfat.img
 #mcopy -oi seed-vfat.img $tmpdir/user-data $tmpdir/meta-data ::
 
-rm -rf "${TMPDIR}"
+
 
