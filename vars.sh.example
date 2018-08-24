@@ -16,6 +16,7 @@ INITIAL_USER_SSH_KEY="<foo bar ssh public key>"
 
 
 ## Collector VM Network information (Comment for DHCP)
+##  * MAC_ADDR is always required
 MAC_ADDR="x.x.x.x"
 IP_CIDR="x.x.x.x/y"
 GATEWAY="x.x.x.x"
