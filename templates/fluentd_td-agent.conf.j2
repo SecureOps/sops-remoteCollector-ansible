@@ -54,8 +54,8 @@
 ###
 ### OUTPUTS
 ###
-{% for output in ['syslog', 'netflow', 'filebeat', 'winlogbeat', 'metricbeat'] %}
-
+# We are enabling only syslog for now # {--% for output in ['syslog', 'netflow', 'filebeat', 'winlogbeat', 'metricbeat'] %}
+{% for output in ['syslog'] %}
 <match {{ output }}.**>
   @type copy
   <store>
