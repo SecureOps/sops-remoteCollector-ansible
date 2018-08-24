@@ -15,7 +15,7 @@ ANSIBLE_PULL_URL="https://github.com/SecureOps/sops-remoteCollector-ansible.git"
 ANSIBLE_PULL_PLAYBOOK="collector-setup.yaml"
 
 # Phone Home Url, it's called when cloud-init is finished
-PHONE_HOME_URL="https://repository.redlabnet.com/"
+PHONE_HOME_URL="https://repository.redlabnet.com"
 
 #Set random root password 
 ROOT_PWD="$( pwgen 20 -1 )"
@@ -48,10 +48,9 @@ users:
     ssh-authorized-keys:
       - ${INITIAL_USER_SSH_KEY}
 
-
 #chpasswd:
 #  list: |
-#    root:${ROOT_PWD}
+#    ${INITIAL_USER_NAME}:${ROOT_PWD}
 #  expire: False
 
 apt:
@@ -152,16 +151,19 @@ apt:
 write_files:
   - path: /etc/ansible/facts.d/secureops.fact
     content: |
-     [customer_info]
-     name=${CUSTOMER_NAME}
-     aws_region=${AWS_REGION}
-     aws_key_id=${AWS_KEY_ID}
-     aws_sec_key=${AWS_SEC_KEY}
+      [customer_info]
+      name=${CUSTOMER_NAME}
+      aws_region=${AWS_REGION}
+      aws_key_id=${AWS_KEY_ID}
+      aws_sec_key=${AWS_SEC_KEY}
+      #
+      [devops]
+      ansible_pull_url=${ANSIBLE_PULL_URL}
+      ansible_pull_playbook=${ANSIBLE_PULL_PLAYBOOK}
+      phone_home_url=${PHONE_HOME_URL}
 
 
-
-
-#package_upgrade: True
+#do this via ansible ? #-> package_upgrade: True
 
 packages:
   - python-minimal
@@ -170,11 +172,12 @@ packages:
   - build-essential
 
 runcmd:
+  - curl -s ${PHONE_HOME_URL}/cloudsiem@secureops.com.asc | gpg --import --batch
   - ansible-pull  -U ${ANSIBLE_PULL_URL} ${ANSIBLE_PULL_PLAYBOOK}
 
 
 #phone_home:
-#  url: ${PHONE_HOME_URL}/
+#  url: ${PHONE_HOME_URL}/${CUSTOMER_NAME}_data/cloud-init-report
 #  post: [ "${CUSTOMER_NAME}", pub_key_dsa, pub_key_rsa, pub_key_ecdsa, instance_id ]
 
 EOF
@@ -215,12 +218,4 @@ set -u
 
 # generate the seed images
 genisoimage -output ${CUSTOMER_NAME}-ci-img.iso -volid cidata -joliet -rock ${TMPDIR}/
-#cloud-localds -v --network-config=${TMPDIR}/network-config ${CUSTOMER_NAME}-ci-img.iso ${TMPDIR}/user-data ${TMPDIR}/meta-data 
-
-# for vfat
-#truncate --size 2M seed-vfat.img
-#mkfs.vfat -n cidata seed-vfat.img
-#mcopy -oi seed-vfat.img $tmpdir/user-data $tmpdir/meta-data ::
-
-
-
+## alternative method ##-> cloud-localds -v --network-config=${TMPDIR}/network-config ${CUSTOMER_NAME}-ci-img.iso ${TMPDIR}/user-data ${TMPDIR}/meta-data 
