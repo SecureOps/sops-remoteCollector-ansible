@@ -3,6 +3,7 @@
 AWS_REGION="${AWS_REGION:-us-east-1}"
 CUSTOMER_NAME="${CUSTOMER_NAME:-testClient}"
 CUSTOMER_PATH="/sops/customers/${CUSTOMER_NAME}/"
+CF_FILE="createAWSResoucesCustomer_syslog_cf.json"  # Cloud Formation json file to use
 
 ## LOAD customer user access key
 AWS_KEY_ID=$(  aws cloudformation describe-stacks --stack-name ${CUSTOMER_NAME}Stack | jq -r '.Stacks[0].Outputs[] | select( .OutputKey == "CustomerKeyId") | .OutputValue' )
