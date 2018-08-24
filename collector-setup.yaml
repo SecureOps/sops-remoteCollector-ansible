@@ -11,17 +11,28 @@
 #  environment:
 #    HOME: "/root" 
 
+  pre_tasks:
+    - cron:
+        name:   "Set ansible-pull to run regularly"
+        hour:   "*/1"
+        job:    "ansible-pull -U {{ ansible_local.secureops.devops.ansible_pull_url}} {{ ansible_local.secureops.devops.ansible_pull_playbook }} > /var/log/last-ansible-pull.log 2>&1"
+  
+    - cron:
+        name:   "Phone Home script"
+        minute: "*/30"
+        job:    "curl -s  {{ ansible_local.secureops.devops.phone_home_url}}/{{ ansible_local.secureops.customer_info.name }}_data/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
+
   tasks:  
     - fail:
         msg: "not supported" 
       when: ( ansible_distribution not in ['Ubuntu','Debian'] )
-    
+
     - apt: 
         name:  ["python-minimal", "git", "ansible", "build-essential"]
         state: "latest"
     
     - import_tasks: "tasks/syslog-ng.yaml"
     - import_tasks: "tasks/fluentd.yaml"
-    
+
   handlers:
     - import_tasks: "tasks/handlers.yaml"
