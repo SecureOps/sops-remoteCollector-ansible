@@ -37,11 +37,11 @@
         proto: "tcp"
       with_items: [22, 514, 5044, 5514]
 
-    - name: "UFW (firewall) - Open allowed ports (tcp)"
+    - name: "UFW (firewall) - Open allowed ports (udp)"
       ufw:
         rule: "allow"
         port: "{{item}}"
-        proto: "tcp"
+        proto: "udp"
       with_items: [514, 5514]
 
     - name: "UFW (firewall) - Enable and set policy to deny"
