@@ -17,7 +17,7 @@
       when: ( ansible_distribution not in ['Ubuntu','Debian'] )
 
     - apt: 
-        name:  ["python-minimal", "git", "ansible", "build-essential", "awscli", "openjdk-11-jdk"]
+        name:  ["python-minimal", "git", "ansible", "build-essential", "awscli", "openjdk-8-jdk-headless"]
         state: "latest"
     
     - import_tasks: "tasks/syslog-ng.yaml"
