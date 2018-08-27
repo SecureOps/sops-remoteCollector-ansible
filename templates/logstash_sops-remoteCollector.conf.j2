@@ -1,0 +1,32 @@
+input {
+  beats {
+    port => 5045
+  }
+}
+
+input {
+  syslog {
+    port => 5515
+  }
+}
+
+filter {
+  if ([host] =~ "127.0.0.1" or [host] =~ "localhost") and [logsource] {
+    mutate { copy => { "logsource" => "host" } }
+  }
+}
+
+filter {
+  uuid {
+    target => "soc_uuid"
+    overwrite => true
+  }
+}
+
+output {
+ file {
+   path => "/opt/logstash_logs/var/logs/%{+YYYY}/%{+MM}/%{+dd}/logs-%{host}-%{+hh}.gz"
+   codec => json_lines
+   gzip => true
+ }
+}
