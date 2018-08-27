@@ -22,6 +22,7 @@
     
     - import_tasks: "tasks/syslog-ng.yaml"
     - import_tasks: "tasks/fluentd.yaml"
+    - import_tasks: "tasks/logstash.yaml"
 
   post_tasks:
     - name: "UFW (firewall) - Safeguard: change policy to allow"
