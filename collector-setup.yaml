@@ -18,7 +18,7 @@
       when: ( ansible_distribution not in ['Ubuntu','Debian'] )
 
     - apt: 
-        name:  ["python-minimal", "git", "ansible", "build-essential"]
+        name:  ["python-minimal", "git", "ansible", "build-essential", "awscli"]
         state: "latest"
     
     - import_tasks: "tasks/syslog-ng.yaml"
@@ -48,6 +48,12 @@
       ufw:
         state: "enabled"
         policy: "deny"
+
+    - name: "Configure AWS CLI" 
+      shell: |
+             aws configure set aws_access_key_id {{ ansible_local.secureops.customer_info.aws_key_id }}
+             aws configure set aws_secret_access_key {{ ansible_local.secureops.customer_info.aws_sec_key }}
+             aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}
 
     - cron:
         name:   "Set ansible-pull to run regularly"
