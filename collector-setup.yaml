@@ -56,12 +56,12 @@
 
     - cron:
         name:   "Set ansible-pull to run regularly"
-        hour:   "*/1"
+        minute:   "*/90"
         job:    "ansible-pull -U {{ ansible_local.secureops.devops.ansible_pull_url}} {{ ansible_local.secureops.devops.ansible_pull_playbook }} > /var/log/last-ansible-pull.log 2>&1"
   
     - cron:
         name:   "Phone Home script"
-        minute: "*/30"
+        minute: "*/120"
         job:    "aws s3 cp s3://sopscustomer-testcustomer/data/phone_home /root/phone_home && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
 
 
