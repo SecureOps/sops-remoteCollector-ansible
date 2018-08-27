@@ -1,0 +1,57 @@
+---
+###
+### Install Logstash
+###
+
+- name: "Pinning Elasticsearch version (DEB)"
+  tags: ["pinning"]
+  copy:
+    dest: "/etc/apt/preferences.d/elasticsearch"
+    content: |
+      Package: logstash
+      Pin: version 6.4.0*
+      Pin-Priority: 900
+
+- name: "Install Logstash"
+  apt: 
+    name:  ["logstash={{logstash_version}}"]
+    state: "present"
+  retries: 3
+  notify:
+    - "Restart logstash"
+
+- file: 
+    path:  "/opt/logstash/logs"
+    owner: "logstash"
+    group: "logstash"
+    state: "directory"
+
+- file: 
+    path:  "/opt/logstash/buffer"
+    owner: "logstash"
+    group: "logstash"
+    state: "directory"
+
+#######
+#######
+## Install logstash plugins
+##
+#- shell: "/usr/sbin/td-agent-gem list | grep fluent-plugin-kinesis"
+#  ignore_errors: "yes"
+#  register: shell_result   
+#- name: "Install fluent-plugin-kinesis fluent plugins... " 
+#  shell: "/usr/sbin/td-agent-gem install fluent-plugin-kinesis"
+#  when:  ( shell_result.rc != 0 )
+#  retries: 3
+##
+##
+##
+######
+######
+
+- template:
+    src:  "logstash_sops-remoteCollector.conf.j2"
+    dest: "/etc/logstash/conf.d/sops-remoteCollector.conf"
+    mode: "0444"
+  notify:
+    - "Restart logstash"
