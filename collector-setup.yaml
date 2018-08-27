@@ -9,7 +9,7 @@
   become: yes
 
   vars:
-    logstash_version: "6.4.0"
+    logstash_version: "6.3.2"
 
   tasks:  
     - fail:
@@ -21,7 +21,7 @@
         state: "latest"
     
     - import_tasks: "tasks/syslog-ng.yaml"
-    - import_tasks: "tasks/fluentd.yaml"
+    #- import_tasks: "tasks/fluentd.yaml"
     - import_tasks: "tasks/logstash.yaml"
 
   post_tasks:
