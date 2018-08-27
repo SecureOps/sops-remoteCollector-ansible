@@ -30,11 +30,17 @@
                                 "firehose:PutRecord",
                                 "kinesis:PutRecords",
                                 "firehose:PutRecordBatch",
-                                "kinesis:DescribeStream"
+                                "kinesis:DescribeStream",
+                                "s3:GetBucketLocation",
+                                "s3:GetObject",
+                                "s3:ListBucket",
+                                "s3:ListBucketMultipartUploads"
                             ],
                             "Resource": [ 
                                 {"Fn::Join": ["", ["arn:aws:kinesis:*:*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
-                                {"Fn::Join": ["", ["arn:aws:firehose:*:*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] }
+                                {"Fn::Join": ["", ["arn:aws:firehose:*:*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
+                                {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] } ] ] },
+                                {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] }, "*" ] ] }
                              ]
                         } ]
                     }
