@@ -1,32 +1,46 @@
 input {
+  file {
+    path => "/var/log/"
+  }
+
   beats {
-    port => 5045
+    port => 5044
+  }
+
+  syslog {
+    port => 5514
   }
 }
 
-input {
-  syslog {
-    port => 5515
-  }
-}
 
 filter {
   if ([host] =~ "127.0.0.1" or [host] =~ "localhost") and [logsource] {
     mutate { copy => { "logsource" => "host" } }
   }
-}
 
-filter {
+  mutate {
+    add_field => { "soc_customer_tag" => "secureopsCorp" }
+    add_field => { "soc_hostname" => "%{host}" }
+  }
+
   uuid {
-    target => "soc_uuid"
+    target => "soc_record_id"
     overwrite => true
+
+  mutate {
+     copy => { "type" => "soc_tag" }
   }
 }
-
 output {
  file {
-   path => "/opt/logstash_logs/var/logs/%{+YYYY}/%{+MM}/%{+dd}/logs-%{host}-%{+hh}.gz"
+   path => "/opt/logstash/logs/%{+YYYY}/%{+MM}/%{+dd}/logs-%{host}-%{+hh}.gz"
    codec => json_lines
    gzip => true
  }
+
+  kinesis {
+    stream_name => "logs-useast1-syslog.secureops.com"
+    region => "us-east-1"
+    metrics_level => "none"
+  }
 }
