@@ -8,7 +8,11 @@
     name:  "syslog-ng"
     state: "restarted"
 
-    
+- name: "Restart logstash"
+  service: 
+    name:  "logstash"
+    state: "restarted"
+
 - name: "Restart td-agent"
   service: 
     name:  "td-agent"
