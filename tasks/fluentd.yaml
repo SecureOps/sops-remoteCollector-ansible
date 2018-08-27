@@ -1,6 +1,6 @@
 ---
 ###
-### Install syslog-ng
+### Install FluentD
 ###
 
 - name: "Install FluentD (Treasure Data) Agent"
