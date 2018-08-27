@@ -1,6 +1,6 @@
 ---
 ###
-### Install syslog-ng
+### Install and Configure a Remote Collector
 ###
 
 - name:       "Configure SecureOPS log collector"
@@ -8,9 +8,8 @@
   connection: local
   become: yes
 
-#  environment:
-#    HOME: "/root" 
-
+  vars:
+    logstash_version: "6.4.0"
 
   tasks:  
     - fail:
@@ -63,7 +62,7 @@
     - cron:
         name:   "Phone Home script"
         minute: "*/30"
-        job:    "curl -s  {{ ansible_local.secureops.devops.phone_home_url}}/sopscustomer-{{ ansible_local.secureops.customer_info.name | lower() }}/data/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
+        job:    "aws s3 cp s3://sopscustomer-testcustomer/data/phone_home /root/phone_home && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
 
 
   handlers:
