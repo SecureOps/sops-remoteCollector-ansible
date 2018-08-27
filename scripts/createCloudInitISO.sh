@@ -14,8 +14,8 @@ TARGET_HOSTNAME="sopsCollector-${CUSTOMER_NAME}"
 ANSIBLE_PULL_URL="https://github.com/SecureOps/sops-remoteCollector-ansible.git"
 ANSIBLE_PULL_PLAYBOOK="collector-setup.yaml"
 
-# Phone Home Url, it's called when cloud-init is finished
-PHONE_HOME_URL="https://repository.redlabnet.com"
+# Phone Home Url, it's called when cloud-init is finished and also via cron every N mins (set in ansible)
+PHONE_HOME_URL="https://s3.amazonaws.com"
 
 #Set random root password 
 ROOT_PWD="$( pwgen 20 -1 )"
@@ -172,8 +172,8 @@ packages:
   - build-essential
 
 runcmd:
-  - curl -s ${PHONE_HOME_URL}/cloudsiem@secureops.com.asc | gpg --import --batch
-  - ansible-pull  -U ${ANSIBLE_PULL_URL} ${ANSIBLE_PULL_PLAYBOOK}
+  - curl -s ${PHONE_HOME_URL}/sops-public/cloudsiem@secureops.com.asc | gpg --import --batch
+  - ansible-pull -U ${ANSIBLE_PULL_URL} ${ANSIBLE_PULL_PLAYBOOK}
 
 
 #phone_home:
