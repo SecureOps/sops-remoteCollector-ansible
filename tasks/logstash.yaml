@@ -9,12 +9,12 @@
     dest: "/etc/apt/preferences.d/logstash"
     content: |
       Package: logstash
-      Pin: version 1:{{ logstash_version }}-*
+      Pin: version 1:{{ logstash_version }}*
       Pin-Priority: 900
 
 - name: "Install Logstash"
   apt: 
-    name:  ["logstash={{logstash_version}}*"]
+    name:  ["logstash=1:{{logstash_version}}*"]
     state: "present"
   retries: 3
   notify:
