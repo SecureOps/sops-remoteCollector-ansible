@@ -34,7 +34,8 @@
                                 "s3:GetBucketLocation",
                                 "s3:GetObject",
                                 "s3:ListBucket",
-                                "s3:ListBucketMultipartUploads"
+                                "s3:ListBucketMultipartUploads",
+                                "cloudwatch:PutMetricData"
                             ],
                             "Resource": [ 
                                 {"Fn::Join": ["", ["arn:aws:kinesis:*:*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
