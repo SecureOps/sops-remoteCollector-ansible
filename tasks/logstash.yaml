@@ -27,7 +27,7 @@
     state: "directory"
 
 - file: 
-    path:  "/opt/logstash/buffer"
+    path:  "/opt/logstash/data"
     owner: "logstash"
     group: "logstash"
     state: "directory"
@@ -52,6 +52,13 @@
 - template:
     src:  "logstash_sops-remoteCollector.conf.j2"
     dest: "/etc/logstash/conf.d/sops-remoteCollector.conf"
+    mode: "0444"
+  notify:
+    - "Restart logstash"
+
+- template:
+    src:  "logstash_logstash.yml.j2"
+    dest: "/etc/logstash/logstash.yml"
     mode: "0444"
   notify:
     - "Restart logstash"
