@@ -43,6 +43,14 @@
   shell: "/usr/share/logstash/bin/logstash-plugin install logstash-filter-uuid"
   when:  ( shell_result.rc != 0 )
   retries: 3
+  
+- shell: "/usr/share/logstash/bin/logstash-plugin  list | grep -i logstash-output-kinesis"
+  ignore_errors: "yes"
+  register: shell_result
+- name: "Install logstash-filter-uuid plugins... " 
+  shell: "/usr/share/logstash/bin/logstash-plugin install logstash-output-kinesis"
+  when:  ( shell_result.rc != 0 )
+  retries: 3
 ##
 ##
 ##
