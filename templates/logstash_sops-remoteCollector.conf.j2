@@ -27,6 +27,7 @@ filter {
   uuid {
     target => "soc_record_id"
     overwrite => true
+  }
 
   mutate {
     copy => { "type" => "soc_tag" }
