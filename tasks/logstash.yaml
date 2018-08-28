@@ -20,23 +20,25 @@
   notify:
     - "Restart logstash"
 
+- file: 
+    path:  "{{ item }}"
+    owner: "logstash"
+    group: "logstash"
+    state: "directory"
+  loop:
+    - "/opt/logstash/logs"
+    - "/opt/logstash/data"
+    - "/usr/share/logstash/.aws"
+
 - name: "Configure AWS CLI" 
-  shell: |
-         aws configure set aws_access_key_id {{ ansible_local.secureops.customer_info.aws_key_id }}
-         aws configure set aws_secret_access_key {{ ansible_local.secureops.customer_info.aws_sec_key }}
-         aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}
+  copy:
+    dest: "/usr/share/logstash/.aws/credentials"
+    content: |
+             [default]
+             aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
+             aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
+             region = {{ ansible_local.secureops.customer_info.aws_region }}
 
-- file: 
-    path:  "/opt/logstash/logs"
-    owner: "logstash"
-    group: "logstash"
-    state: "directory"
-
-- file: 
-    path:  "/opt/logstash/data"
-    owner: "logstash"
-    group: "logstash"
-    state: "directory"
 
 #######
 #######
