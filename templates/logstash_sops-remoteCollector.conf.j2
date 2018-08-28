@@ -5,13 +5,14 @@ input {
 
   beats {
     port => 5044
+    type => "beats"
   }
 
   syslog {
     port => 5514
+    type => "syslog"
   }
 }
-
 
 filter {
   if ([host] =~ "127.0.0.1" or [host] =~ "localhost") and [logsource] {
@@ -19,7 +20,7 @@ filter {
   }
 
   mutate {
-    add_field => { "soc_customer_tag" => "secureopsCorp" }
+    add_field => { "soc_customer_tag" => "{{ ansible_local.secureops.customer_info.name }}" }
     add_field => { "soc_hostname" => "%{host}" }
   }
 
@@ -28,19 +29,22 @@ filter {
     overwrite => true
 
   mutate {
-     copy => { "type" => "soc_tag" }
+    copy => { "type" => "soc_tag" }
   }
 }
-output {
- file {
-   path => "/opt/logstash/logs/%{+YYYY}/%{+MM}/%{+dd}/logs-%{host}-%{+hh}.gz"
-   codec => json_lines
-   gzip => true
- }
 
-  kinesis {
-    stream_name => "logs-useast1-syslog.secureops.com"
-    region => "us-east-1"
-    metrics_level => "none"
+output {
+  file {
+    path => "/opt/logstash/logs/%{+YYYY}/%{+MM}/%{+dd}/logs-%{host}-%{+hh}.gz"
+     codec => json_lines
+     gzip => true
+   }
+
+  if [type] == "syslog" {
+    kinesis {
+      stream_name => "sopsCustomerLogs-{{ ansible_local.secureops.customer_info.name }}-{{ ansible_local.secureops.customer_info.aws_region }}-syslog"
+      region => "{{ ansible_local.secureops.customer_info.aws_region }}"
+      metrics_level => "none"
+    }
   }
 }
