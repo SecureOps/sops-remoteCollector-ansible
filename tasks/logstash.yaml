@@ -20,6 +20,12 @@
   notify:
     - "Restart logstash"
 
+- name: "Configure AWS CLI" 
+  shell: |
+         aws configure set aws_access_key_id {{ ansible_local.secureops.customer_info.aws_key_id }}
+         aws configure set aws_secret_access_key {{ ansible_local.secureops.customer_info.aws_sec_key }}
+         aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}
+
 - file: 
     path:  "/opt/logstash/logs"
     owner: "logstash"
@@ -47,7 +53,7 @@
 - shell: "/usr/share/logstash/bin/logstash-plugin  list | grep -i logstash-output-kinesis"
   ignore_errors: "yes"
   register: shell_result
-- name: "Install logstash-filter-uuid plugins... " 
+- name: "Install logstash-output-kinesis plugins... " 
   shell: "/usr/share/logstash/bin/logstash-plugin install logstash-output-kinesis"
   when:  ( shell_result.rc != 0 )
   retries: 3
