@@ -1,11 +1,13 @@
 input {
   file {
     path => "/var/log/"
+    type => "syslog"
+    tags => ["collector_logs"]
   }
 
   beats {
     port => 5044
-    type => "beats"
+    type => "beat"
   }
 
   syslog {
