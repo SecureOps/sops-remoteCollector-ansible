@@ -1,6 +1,6 @@
 #!/bin/bash
 
-AWS_REGION="${AWS_REGION:-us-east-1}"
+AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-1}"
 CUSTOMER_NAME="${CUSTOMER_NAME:-testClient}"
 CUSTOMER_PATH="/sops/customers/${CUSTOMER_NAME}/"
 CF_FILE="createAWSResoucesCustomer_syslog_cf.json"  # Cloud Formation json file to use

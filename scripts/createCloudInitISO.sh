@@ -49,10 +49,10 @@ users:
     ssh-authorized-keys:
       - ${INITIAL_USER_SSH_KEY}
 
-#chpasswd:
-#  list: |
-#    ${INITIAL_USER_NAME}:${ROOT_PWD}
-#  expire: False
+chpasswd:
+  list: |
+    ${INITIAL_USER_NAME}:${ROOT_PWD}
+  expire: False
 
 apt:
   sources:
@@ -154,7 +154,7 @@ write_files:
     content: |
       [customer_info]
       name=${CUSTOMER_NAME}
-      aws_region=${AWS_REGION}
+      aws_region=${AWS_DEFAULT_REGION}
       aws_key_id=${AWS_KEY_ID}
       aws_sec_key=${AWS_SEC_KEY}
       #
