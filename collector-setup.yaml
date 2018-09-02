@@ -51,7 +51,7 @@
 
     - name: "Configure AWS CLI" 
       shell: |
-             aws configure set aws_access_key_id {{ ansible_local.secureops.customer_info.aws_key_id }}
+             aws configure set aws_access_key_id {{ ansible_local.secureops.customer_info.aws_key_id }} 
              aws configure set aws_secret_access_key {{ ansible_local.secureops.customer_info.aws_sec_key }}
              aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}
 
@@ -62,7 +62,7 @@
   
     - cron:
         name:   "Phone Home script"
-        minute: "*/30"
+        minute: "*/5"
         job:    "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}/data/phone_home /root/phone_home && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
 
 
