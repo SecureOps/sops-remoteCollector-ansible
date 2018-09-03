@@ -50,10 +50,19 @@
         policy: "deny"
 
     - name: "Configure AWS CLI" 
-      shell: |
-             aws configure set aws_access_key_id {{ ansible_local.secureops.customer_info.aws_key_id }} 
-             aws configure set aws_secret_access_key {{ ansible_local.secureops.customer_info.aws_sec_key }}
-             aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}
+      copy:
+        dest: "/root/.aws/credentials"
+        content: |
+                 [default]
+                 aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
+                 aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
+                 region = {{ ansible_local.secureops.customer_info.aws_region }}
+
+#    - name: "Configure AWS CLI" 
+#      shell: |
+#             aws configure set aws_access_key_id {{ ansible_local.secureops.customer_info.aws_key_id }} 
+#             aws configure set aws_secret_access_key {{ ansible_local.secureops.customer_info.aws_sec_key }}
+#             aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}
 
     - cron:
         name:   "Set ansible-pull to run regularly"
