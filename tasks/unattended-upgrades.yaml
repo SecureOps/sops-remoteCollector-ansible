@@ -1,0 +1,36 @@
+---
+###
+### Configure unattended-updates on Ubuntu Systems
+###
+
+- apt: 
+    name:  ["unattended-upgrades"]
+    state: "latest"
+    update_cache: "yes"
+
+- copy:
+    dest: "/etc/apt/apt.conf.d/20auto-upgrades"
+    mode: "0655"
+    content: |
+             APT::Periodic::Update-Package-Lists "1";
+             APT::Periodic::Unattended-Upgrade "1";
+ 
+- copy:
+    dest: "/etc/apt/apt.conf.d/50unattended-upgrades"
+    mode: "0655"
+    content: |
+             Unattended-Upgrade::Allowed-Origins {
+                 "${distro_id}:${distro_codename}-security";
+                 "${distro_id}ESM:${distro_codename}";
+                 "${distro_id}:${distro_codename}-updates";
+             };
+             Unattended-Upgrade::Package-Blacklist {
+               "logstash";
+             };
+             Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+             Unattended-Upgrade::MinimalSteps "true";
+             //Unattended-Upgrade::Mail "cloud-siem@secureops.com";
+             //Unattended-Upgrade::MailOnlyOnError "true";
+             Unattended-Upgrade::Remove-Unused-Dependencies "true";
+             //Unattended-Upgrade::Automatic-Reboot "false";
+
