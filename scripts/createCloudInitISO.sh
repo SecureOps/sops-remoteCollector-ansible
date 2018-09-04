@@ -9,7 +9,7 @@ SCRIPT_DIR=$( readlink -f ${SCRIPT_DIR} )
 
 
 # Hostname
-TARGET_HOSTNAME="sopsCollector-${CUSTOMER_NAME}"
+TARGET_HOSTNAME="sopsCollector-${CUSTOMER_NAME}${RC_SERIAL:-01}"
 
 # Where to look for ansible playbook
 ANSIBLE_PULL_URL="https://github.com/SecureOps/sops-remoteCollector-ansible.git"
@@ -183,11 +183,14 @@ runcmd:
 
 EOF
 
+# Confirmation of VM settings:
+echo "Before providing the ISO image to the customer, please make sure that these parameters are correct:"
+
 cat <<EOF > "${TMPDIR}/meta-data"
 instance-id: ${TARGET_HOSTNAME}
 local-hostname: ${TARGET_HOSTNAME}
 EOF
-
+cat "${TMPDIR}/meta-data" 
 
 set +u
 ## Generate network-config file if all network info have been provided
@@ -213,6 +216,7 @@ ethernets:
         - ${NAMESERVER[1]}
 
 EOF
+    cat "${TMPDIR}/network-config"
 fi
 set -u
 
@@ -220,3 +224,4 @@ set -u
 # generate the seed images
 genisoimage -output ${CUSTOMER_NAME}-ci-img.iso -volid cidata -joliet -rock ${TMPDIR}/
 ## alternative method ##-> cloud-localds -v --network-config=${TMPDIR}/network-config ${CUSTOMER_NAME}-ci-img.iso ${TMPDIR}/user-data ${TMPDIR}/meta-data 
+
