@@ -37,11 +37,11 @@ filter {
 }
 
 output {
-  file {
-    path => "/opt/logstash/logs/%{+YYYY}/%{+MM}/%{+dd}/logs-%{host}-%{+hh}.gz"
-     codec => json_lines
-     gzip => true
-   }
+  #file {
+  #  path => "/opt/logstash/logs/%{+YYYY}/%{+MM}/%{+dd}/logs-%{host}-%{+hh}.gz"
+  #   codec => json_lines
+  #   gzip => true
+  # }
 
   if [type] == "syslog" {
     kinesis {
