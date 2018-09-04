@@ -23,28 +23,37 @@
                     "PolicyName": {"Fn::Join": ["-", ["sopsCustomerPolicy", {"Ref": "CustomerName"} ] ] },
                     "PolicyDocument": {
                         "Version": "2012-10-17",
-                        "Statement": [ {
-                            "Effect": "Allow",
-                            "Action": [
-                                "kinesis:DescribeStream",
-                                "kinesis:PutRecord",
-                                "kinesis:PutRecords",
-                                "firehose:PutRecord",
-                                "firehose:PutRecordBatch",
-                                "s3:GetBucketLocation",
-                                "s3:GetObject",
-                                "s3:PutObject",
-                                "s3:ListBucket",
-                                "s3:ListBucketMultipartUploads",
-                                "cloudwatch:PutMetricData"
-                            ],
-                            "Resource": [ 
-                                {"Fn::Join": ["", ["arn:aws:kinesis:*:*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
-                                {"Fn::Join": ["", ["arn:aws:firehose:*:*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
-                                {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] } ] ] },
-                                {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] }, "*" ] ] }
-                             ]
-                        } ]
+                        "Statement": [ 
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "kinesis:DescribeStream",
+                                    "kinesis:PutRecord",
+                                    "kinesis:PutRecords",
+                                    "firehose:PutRecord",
+                                    "firehose:PutRecordBatch",
+                                    "s3:GetBucketLocation",
+                                    "s3:GetObject",
+                                    "s3:PutObject",
+                                    "s3:ListBucket",
+                                    "s3:ListBucketMultipartUploads",
+                                    "cloudwatch:PutMetricData"
+                                ],
+                                "Resource": [ 
+                                    {"Fn::Join": ["", ["arn:aws:kinesis:" , {"Ref": "AWS::Region"},":*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:firehose:", {"Ref": "AWS::Region"},":*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] } ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] }, "*" ] ] }
+                                ]
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "cloudwatch:PutMetricData"
+                                    ],
+                                "Resource": "*"
+                            }
+                        ]
                     }
                 } ]
             }
@@ -69,33 +78,41 @@
                     "PolicyName": {"Fn::Join": ["-", ["sopsCustomerROPolicy", {"Ref": "CustomerName"} ] ] },
                     "PolicyDocument": {
                         "Version": "2012-10-17",
-                        "Statement": [ {
-                            "Effect": "Allow",
-                            "Action": [
-                                "dynamodb:CreateTable",
-                                "dynamodb:PutItem",
-                                "dynamodb:DescribeTable",
-                                "dynamodb:DeleteItem",
-                                "dynamodb:GetItem",
-                                "dynamodb:Scan",
-                                "dynamodb:UpdateItem",
-                                "kinesis:GetShardIterator",
-                                "kinesis:ListTagsForStream",
-                                "kinesis:DescribeStream",
-                                "kinesis:GetRecords",
-                                "kinesis:GetRecord",
-                                "s3:GetBucketLocation",
-                                "s3:GetObject",
-                                "s3:ListBucket",
-                                "s3:ListBucketMultipartUploads",
-                            ],
-                            "Resource": [ 
-                                {"Fn::Join": ["", ["arn:aws:kinesis:*:*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
-                                {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] } ] ] },
-                                {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] }, "*" ] ] },
-                                {"Fn::Join": ["", ["arn:aws:dynamodb:::table/", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerName"} ] ] }, "*" ] ] },
-                             ]
-                        } ]
+                        "Statement": [ 
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "dynamodb:CreateTable",
+                                    "dynamodb:PutItem",
+                                    "dynamodb:DescribeTable",
+                                    "dynamodb:DeleteItem",
+                                    "dynamodb:GetItem",
+                                    "dynamodb:Scan",
+                                    "dynamodb:UpdateItem",
+                                    "kinesis:GetShardIterator",
+                                    "kinesis:ListTagsForStream",
+                                    "kinesis:DescribeStream",
+                                    "kinesis:GetRecords",
+                                    "s3:GetBucketLocation",
+                                    "s3:GetObject",
+                                    "s3:ListBucket",
+                                    "s3:ListBucketMultipartUploads"
+                                ],
+                                "Resource": [ 
+                                    {"Fn::Join": ["", ["arn:aws:kinesis:" , {"Ref": "AWS::Region"},":*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:dynamodb:", {"Ref": "AWS::Region"},":*:table/", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerName"} ] ] }, "*" ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] } ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] }, "*" ] ] }
+                                 ]
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "cloudwatch:PutMetricData"
+                                    ],
+                                "Resource": "*"
+                            }
+                        ]
                     }
                 } ]
             }
@@ -204,8 +221,8 @@
                         "Resource": [
                             {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"} ] ] },
                             {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"}, "*" ] ] },
-                            {"Fn::Join": ["", ["arn:aws:kinesis:*:*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
-                            {"Fn::Join": ["", ["arn:aws:firehose:*:*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] }
+                            {"Fn::Join": ["", ["arn:aws:kinesis:" , {"Ref": "AWS::Region"},":*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
+                            {"Fn::Join": ["", ["arn:aws:firehose:", {"Ref": "AWS::Region"},":*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] }
                         ]
                     } ]
                 }
