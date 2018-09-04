@@ -17,37 +17,16 @@
       when: ( ansible_distribution not in ['Ubuntu','Debian'] )
 
     - apt: 
-        name:  ["python-minimal", "git", "ansible", "build-essential", "awscli", "openjdk-8-jdk-headless"]
+        name:  ["python-minimal", "git", "ansible", "build-essential", "awscli", "openjdk-8-jdk-headless", "mailutils", "apt-listchanges"]
         state: "latest"
-    
+        update_cache: "yes"
+
     - import_tasks: "tasks/syslog-ng.yaml"
-    #- import_tasks: "tasks/fluentd.yaml"
     - import_tasks: "tasks/logstash.yaml"
+    - import_tasks: "tasks/firewall.yaml"
+    - import-tasks: "tasks/unattended-upgrades.yaml"
 
   post_tasks:
-    - name: "UFW (firewall) - Safeguard: change policy to allow"
-      ufw:
-        state: "enabled"
-        policy: "allow"
-
-    - name: "UFW (firewall) - Open allowed ports (tcp)"
-      ufw:
-        rule: "allow"
-        port: "{{item}}"
-        proto: "tcp"
-      with_items: [22, 514, 5044, 5514]
-
-    - name: "UFW (firewall) - Open allowed ports (udp)"
-      ufw:
-        rule: "allow"
-        port: "{{item}}"
-        proto: "udp"
-      with_items: [514, 5514]
-
-    - name: "UFW (firewall) - Enable and set policy to deny"
-      ufw:
-        state: "enabled"
-        policy: "deny"
 
     - name: "Configure AWS CLI" 
       copy:
@@ -57,12 +36,6 @@
                  aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
                  aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
                  region = {{ ansible_local.secureops.customer_info.aws_region }}
-
-#    - name: "Configure AWS CLI" 
-#      shell: |
-#             aws configure set aws_access_key_id {{ ansible_local.secureops.customer_info.aws_key_id }} 
-#             aws configure set aws_secret_access_key {{ ansible_local.secureops.customer_info.aws_sec_key }}
-#             aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}
 
     - cron:
         name:   "Set ansible-pull to run regularly"
