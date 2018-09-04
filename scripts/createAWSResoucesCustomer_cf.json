@@ -23,20 +23,37 @@
                     "PolicyName": {"Fn::Join": ["-", ["sopsCustomerPolicy", {"Ref": "CustomerName"} ] ] },
                     "PolicyDocument": {
                         "Version": "2012-10-17",
-                        "Statement": [ {
-                            "Effect": "Allow",
-                            "Action": [
-                                "kinesis:PutRecord",
-                                "firehose:PutRecord",
-                                "kinesis:PutRecords",
-                                "firehose:PutRecordBatch",
-                                "kinesis:DescribeStream"
-                            ],
-                            "Resource": [ 
-                                {"Fn::Join": ["", ["arn:aws:kinesis:*:*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
-                                {"Fn::Join": ["", ["arn:aws:firehose:*:*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] }
-                             ]
-                        } ]
+                        "Statement": [ 
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "kinesis:DescribeStream",
+                                    "kinesis:PutRecord",
+                                    "kinesis:PutRecords",
+                                    "firehose:PutRecord",
+                                    "firehose:PutRecordBatch",
+                                    "s3:GetBucketLocation",
+                                    "s3:GetObject",
+                                    "s3:PutObject",
+                                    "s3:ListBucket",
+                                    "s3:ListBucketMultipartUploads",
+                                    "cloudwatch:PutMetricData"
+                                ],
+                                "Resource": [ 
+                                    {"Fn::Join": ["", ["arn:aws:kinesis:" , {"Ref": "AWS::Region"},":*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:firehose:", {"Ref": "AWS::Region"},":*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] } ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] }, "*" ] ] }
+                                ]
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "cloudwatch:PutMetricData"
+                                    ],
+                                "Resource": "*"
+                            }
+                        ]
                     }
                 } ]
             }
@@ -52,6 +69,65 @@
             }
         },
         
+        "sopsUserRO": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "UserName": {"Fn::Join": ["-", ["sopsCustomerRO", {"Ref": "CustomerName"} ] ] },
+                "Path": { "Fn::Join": ["", ["/sops/customers/", {"Ref": "CustomerName"}, "/" ] ] },
+                "Policies": [ {
+                    "PolicyName": {"Fn::Join": ["-", ["sopsCustomerROPolicy", {"Ref": "CustomerName"} ] ] },
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [ 
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "dynamodb:CreateTable",
+                                    "dynamodb:PutItem",
+                                    "dynamodb:DescribeTable",
+                                    "dynamodb:DeleteItem",
+                                    "dynamodb:GetItem",
+                                    "dynamodb:Scan",
+                                    "dynamodb:UpdateItem",
+                                    "kinesis:GetShardIterator",
+                                    "kinesis:ListTagsForStream",
+                                    "kinesis:DescribeStream",
+                                    "kinesis:GetRecords",
+                                    "s3:GetBucketLocation",
+                                    "s3:GetObject",
+                                    "s3:ListBucket",
+                                    "s3:ListBucketMultipartUploads"
+                                ],
+                                "Resource": [ 
+                                    {"Fn::Join": ["", ["arn:aws:kinesis:" , {"Ref": "AWS::Region"},":*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:dynamodb:", {"Ref": "AWS::Region"},":*:table/", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerName"} ] ] }, "*" ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] } ] ] },
+                                    {"Fn::Join": ["", ["arn:aws:s3:::", {"Fn::Join": ["-", ["sopscustomer",  {"Ref":"CustomerS3BucketName"} ] ] }, "*" ] ] }
+                                 ]
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "cloudwatch:PutMetricData"
+                                    ],
+                                "Resource": "*"
+                            }
+                        ]
+                    }
+                } ]
+            }
+        },
+
+        "sopsUserROKey": {
+            "Type": "AWS::IAM::AccessKey",
+            "DependsOn": "sopsUserRO",
+            "Properties": {
+                "Serial": 0,
+                "Status": "Active",
+                "UserName": {"Fn::Join": ["-", ["sopsCustomerRO", {"Ref": "CustomerName"} ] ] }
+            }
+        },
+        
         "sopsCustomerKinesisStreamSyslog": {
             "Type": "AWS::Kinesis::Stream",
             "DependsOn": "sopsUser",
@@ -62,62 +138,6 @@
                 "Tags" : [ 
                     {"Key":"CustomerName", "Value":  {"Ref": "CustomerName"}}, 
                     {"Key":"StreamType", "Value": "syslog"}
-                ]
-            }
-        },
-        
-        "sopsCustomerKinesisStreamFilebeat": {
-            "Type": "AWS::Kinesis::Stream",
-            "DependsOn": "sopsUser",
-            "Properties": {
-                "Name" : {"Fn::Join": ["-", ["sopsCustomerLogs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "filebeat" ] ] },
-                "RetentionPeriodHours" : 24,
-                "ShardCount" : 1,
-                "Tags" : [ 
-                    {"Key":"CustomerName", "Value":  {"Ref": "CustomerName"}}, 
-                    {"Key":"StreamType", "Value": "filebeat"}
-                ]
-            }
-        },
-        
-        "sopsCustomerKinesisStreamMetricbeat": {
-            "Type": "AWS::Kinesis::Stream",
-            "DependsOn": "sopsUser",
-            "Properties": {
-                "Name" : {"Fn::Join": ["-", ["sopsCustomerLogs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "metricbeat" ] ] },
-                "RetentionPeriodHours" : 24,
-                "ShardCount" : 1,
-                "Tags" : [ 
-                    {"Key":"CustomerName", "Value":  {"Ref": "CustomerName"}}, 
-                    {"Key":"StreamType", "Value": "metricbeat"}
-                ]
-            }
-        },
-
-        "sopsCustomerKinesisStreamWinlogbeat": {
-            "Type": "AWS::Kinesis::Stream",
-            "DependsOn": "sopsUser",
-            "Properties": {
-                "Name" : {"Fn::Join": ["-", ["sopsCustomerLogs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "winlogbeat" ] ] },
-                "RetentionPeriodHours" : 24,
-                "ShardCount" : 1,
-                "Tags" : [ 
-                    {"Key":"CustomerName", "Value":  {"Ref": "CustomerName"}}, 
-                    {"Key":"StreamType", "Value": "winlogbeat"}
-                ]
-            }
-        },
-        
-        "sopsCustomerKinesisStreamNetflow": {
-            "Type": "AWS::Kinesis::Stream",
-            "DependsOn": "sopsUser",
-            "Properties": {
-                "Name" : {"Fn::Join": ["-", ["sopsCustomerLogs", {"Ref": "CustomerName"}, {"Ref": "AWS::Region"}, "netflow" ] ] },
-                "RetentionPeriodHours" : 24,
-                "ShardCount" : 1,
-                "Tags" : [ 
-                    {"Key":"CustomerName", "Value":  {"Ref": "CustomerName"}}, 
-                    {"Key":"StreamType", "Value": "netflow"}
                 ]
             }
         },
@@ -244,7 +264,7 @@
               "VersioningConfiguration": { "Status": "Enabled" }
             }
         },
-        
+
         "deliveryRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -292,8 +312,8 @@
                         "Resource": [
                             {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"} ] ] },
                             {"Fn::Join": ["", ["arn:aws:s3:::", {"Ref":"s3bucket"}, "*" ] ] },
-                            {"Fn::Join": ["", ["arn:aws:kinesis:*:*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
-                            {"Fn::Join": ["", ["arn:aws:firehose:*:*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] }
+                            {"Fn::Join": ["", ["arn:aws:kinesis:" , {"Ref": "AWS::Region"},":*:stream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] },
+                            {"Fn::Join": ["", ["arn:aws:firehose:", {"Ref": "AWS::Region"},":*:deliverystream/sopsCustomerLogs-", {"Ref": "CustomerName"}, "-*" ] ] }
                         ]
                     } ]
                 }
@@ -308,6 +328,13 @@
         },
         "CustomerKey": {
             "Value": {"Fn::GetAtt" : ["sopsUserKey", "SecretAccessKey"] } 
+        },
+        
+        "CustomerROKeyId": { 
+            "Value": {"Ref": "sopsUserROKey"}
+        },
+        "CustomerROKey": {
+            "Value": {"Fn::GetAtt" : ["sopsUserROKey", "SecretAccessKey"] } 
         }
     }
 }
