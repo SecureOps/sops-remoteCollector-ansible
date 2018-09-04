@@ -1,0 +1,28 @@
+---
+###
+### Configure Firewall
+###
+
+- name: "UFW (firewall) - Safeguard: change policy to allow"
+  ufw:
+    state: "enabled"
+    policy: "allow"
+
+- name: "UFW (firewall) - Open allowed ports (tcp)"
+  ufw:
+    rule: "allow"
+    port: "{{item}}"
+    proto: "tcp"
+  with_items: [22, 514, 5044, 5514]
+
+- name: "UFW (firewall) - Open allowed ports (udp)"
+  ufw:
+    rule: "allow"
+    port: "{{item}}"
+    proto: "udp"
+  with_items: [514, 5514]
+
+- name: "UFW (firewall) - Enable and set policy to deny"
+  ufw:
+    state: "enabled"
+    policy: "deny"
