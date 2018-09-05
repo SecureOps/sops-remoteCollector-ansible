@@ -28,7 +28,10 @@
 
   post_tasks:
 
-    - name: "Configure AWS CLI" 
+    - name: "Initial AWS CLI config (create path and config files)" 
+      shell: "aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}"
+
+    - name: "Configure AWS CLI credentials" 
       copy:
         dest: "/root/.aws/credentials"
         content: |
