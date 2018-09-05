@@ -24,7 +24,7 @@
     - import_tasks: "tasks/syslog-ng.yaml"
     - import_tasks: "tasks/logstash.yaml"
     - import_tasks: "tasks/firewall.yaml"
-    - import-tasks: "tasks/unattended-upgrades.yaml"
+    - import_tasks: "tasks/unattended-upgrades.yaml"
 
   post_tasks:
 
