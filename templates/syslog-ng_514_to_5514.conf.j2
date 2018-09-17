@@ -5,6 +5,7 @@ source s_net {
       transport("tcp")
       port(514)
       time-zone("UTC")
+      max-connections(200)
     );
     
     network(
@@ -12,6 +13,7 @@ source s_net {
       transport("udp")
       port(514)
       time-zone("UTC")
+      max-connections(200)
     );
 };
 
