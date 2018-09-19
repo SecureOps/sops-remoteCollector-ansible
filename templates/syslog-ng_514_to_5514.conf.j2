@@ -1,6 +1,6 @@
 
 source s_net {
-    network(
+    syslog(
       ip(0.0.0.0)
       transport("tcp")
       port(514)
@@ -8,7 +8,7 @@ source s_net {
       max-connections(200)
     );
     
-    network(
+    syslog(
       ip(0.0.0.0)
       transport("udp")
       port(514)
@@ -18,7 +18,7 @@ source s_net {
 };
 
 destination dn_local_tool { 
-   network(
+   syslog(
       "localhost"
       transport("tcp")
       port(5514)
