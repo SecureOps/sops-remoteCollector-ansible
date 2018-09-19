@@ -18,7 +18,7 @@ source s_net {
 };
 
 destination dn_local_tool { 
-   syslog(
+   network(
       "localhost"
       transport("tcp")
       port(5514)
