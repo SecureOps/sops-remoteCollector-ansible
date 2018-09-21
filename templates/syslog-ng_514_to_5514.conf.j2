@@ -1,19 +1,23 @@
 
 source s_net {
-    syslog(
+    network(
       ip(0.0.0.0)
       transport("tcp")
       port(514)
       time-zone("UTC")
       max-connections(200)
+      log-iw-size(20000)
+      flags(syslog-protocol)
     );
     
-    syslog(
+    network(
       ip(0.0.0.0)
       transport("udp")
       port(514)
       time-zone("UTC")
       max-connections(200)
+      log-iw-size(20000)
+      flags(syslog-protocol)
     );
 };
 
