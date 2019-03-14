@@ -50,4 +50,11 @@ output {
       metrics_level => "none"
     }
   }
+  else if [beat] {
+    kinesis {
+      stream_name => "sopsCustomerLogs-{{ ansible_local.secureops.customer_info.name }}-{{ ansible_local.secureops.customer_info.aws_region }}-beats"
+      region => "{{ ansible_local.secureops.customer_info.aws_region }}"
+      metrics_level => "none"
+    }
+  }
 }
