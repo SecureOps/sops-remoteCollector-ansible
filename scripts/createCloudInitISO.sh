@@ -49,6 +49,9 @@ users:
     ssh_pwauth: False
     ssh-authorized-keys:
       - ${INITIAL_USER_SSH_KEY}
+  - name: ansible_poller
+    shell: /usr/sbin/nologin
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
 
 chpasswd:
   list: |
@@ -154,6 +157,7 @@ write_files:
     content: |
       [customer_info]
       name=${CUSTOMER_NAME}
+      node=${REMOTE_NODE_NAME}
       aws_region=${AWS_DEFAULT_REGION}
       aws_key_id=${AWS_KEY_ID}
       aws_sec_key=${AWS_SEC_KEY}
