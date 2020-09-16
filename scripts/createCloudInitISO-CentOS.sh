@@ -97,13 +97,13 @@ runcmd:
   - ansible-pull -C ${ANSIBLE_PULL_BRANCH:-centos8} -U ${ANSIBLE_PULL_URL} ${ANSIBLE_PULL_PLAYBOOK}
 
 
-phone_home:
- url: ${PHONE_HOME_URL}/sopscustomer-${CUSTOMER_LOWER}/\$INSTANCE_ID/_data/cloud-init-report
- post:
-  - pub_key_rsa
-  - instance_id
-  - fqdn
- tries: 3
+# phone_home:
+#  url: ${PHONE_HOME_URL}/sopscustomer-${CUSTOMER_LOWER}/\$INSTANCE_ID/_data/cloud-init-report
+#  post:
+#   - pub_key_rsa
+#   - instance_id
+#   - fqdn
+#  tries: 3
 EOF
 
 # Confirmation of VM settings:
