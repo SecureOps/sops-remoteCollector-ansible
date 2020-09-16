@@ -96,8 +96,11 @@ runcmd:
 
 phone_home:
  url: ${PHONE_HOME_URL}/${CUSTOMER_NAME}/${INSTANCE_ID}/_data/cloud-init-report
- post: [ "${CUSTOMER_NAME}-${REMOTE_NODE_NAME}", pub_key_dsa, pub_key_rsa, pub_key_ecdsa, instance_id ]
-
+ post:
+  - pub_key_rsa
+  - instance_id
+  - fqdn
+ tries: 3
 EOF
 
 # Confirmation of VM settings:
