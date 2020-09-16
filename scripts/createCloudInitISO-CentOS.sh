@@ -20,6 +20,9 @@ ANSIBLE_PULL_PLAYBOOK="collector-setup.yaml"
 # Phone Home Url, it's called when cloud-init is finished and also via cron every N mins (set in ansible)
 PHONE_HOME_URL="https://s3.amazonaws.com"
 
+# Some converted values
+CUSTOMER_LOWER=$(echo "${CUSTOMER_NAME}" | tr '[:upper:]' '[:lower:]')
+
 #Set random root password
 ROOT_PWD="$( pwgen 20 -1 )"
 #ROOT_PWD="root"
@@ -78,7 +81,7 @@ write_files:
 yum_repos:
   centos-ansible-29:
     baseurl: http://mirrorlist.centos.org/?release=\$releasever&arch=\$basearch&repo=configmanagement-ansible-29
-    name: name=CentOS Configmanagement SIG - ansible-29
+    name: CentOS Configmanagement SIG - ansible-29
     enabled: true
     gpgcheck: 0
     baseurl: http://mirror.centos.org/\$contentdir/\$releasever/configmanagement/\$basearch/ansible-29/
@@ -95,7 +98,7 @@ runcmd:
 
 
 phone_home:
- url: ${PHONE_HOME_URL}/${CUSTOMER_NAME}/${INSTANCE_ID}/_data/cloud-init-report
+ url: ${PHONE_HOME_URL}/sopscustomer-${CUSTOMER_LOWER}/${INSTANCE_ID}/_data/cloud-init-report
  post:
   - pub_key_rsa
   - instance_id
