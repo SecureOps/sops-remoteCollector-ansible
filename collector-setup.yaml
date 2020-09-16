@@ -16,18 +16,29 @@
         name:  ["zip"]
         state: "latest"
         update_cache: "yes"
-    - name: Install python packages for the system
-      pip:
-        executable: /usr/bin/pip3
-        name:
-          - boto3
-    - name: Install python packages for ansible
+    - name: Install python packages (Python36)
       pip:
         name:
           - boto3
     - name: Set the AWS region
       set_fact:
         AWS_REGION: "{{ ansible_local.secureops.customer_info.aws_region }}"
+    - name: "Configure AWS CLI credentials"
+      copy:
+        dest: "/root/.aws/credentials"
+        content: |
+                 [default]
+                 aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
+                 aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
+                 region = {{ AWS_REGION }}
+    - name: "Configure AWS CLI credentials for ansible_poller user"
+      copy:
+        dest: "/home/ansible_poller/.aws/credentials"
+        content: |
+                 [default]
+                 aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
+                 aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
+                 region = {{ AWS_REGION }}
     - name: Placeholder for remote node stack name
       set_fact:
         tmp_node_stack_name: "sopsCustomer-{{ ansible_local.secureops.customer_info.name }}-{{ ansible_local.secureops.customer_info.node }}"
@@ -51,7 +62,6 @@
       copy:
         src: files/sqs_poller.service
         dest: /usr/local/lib/systemd/system/sqs_poller.service
-
     - name: Install the SQS Poller's config.json
       template:
         src: templates/sqs_poller.config.json.j2
@@ -78,22 +88,6 @@
       shell: /tmp/aws/install
     - name: "Initial AWS CLI config (create path and config files)"
       shell: "aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}"
-    - name: "Configure AWS CLI credentials"
-      copy:
-        dest: "/root/.aws/credentials"
-        content: |
-                 [default]
-                 aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
-                 aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
-                 region = {{ ansible_local.secureops.customer_info.aws_region }}
-    - name: "Configure AWS CLI credentials for ansible_poller user"
-      copy:
-        dest: "/home/ansible_poller/.aws/credentials"
-        content: |
-                 [default]
-                 aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
-                 aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
-                 region = {{ ansible_local.secureops.customer_info.aws_region }}
     - cron:
         name:   "Set ansible-pull to run regularly"
         minute:   "*/90"
