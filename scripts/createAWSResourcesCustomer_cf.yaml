@@ -67,6 +67,14 @@ Resources:
           Value: !Sub ${CustomerName}
         - Key: StreamType
           Value: command
+  sopsCustomerSQSCommandQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      KmsMasterKeyId: "alias/aws/sqs"
+      QueueName: !Sub ${CustomerName}-AnsibleCommandQueue
+      Tags:
+        - Key: Name
+          Value: !Sub ${CustomerName}-AnsibleCommandQueue
   sopsCustomerKinesisDeliverystreamCommandResults:
     Type: AWS::KinesisFirehose::DeliveryStream
     DependsOn: deliveryPolicy
@@ -148,3 +156,14 @@ Resources:
             - !Sub '{"access_key": "${sopsCollectorKey}", "access_secret":"'
             - !GetAtt sopsCollectorKey.SecretAccessKey
             - '"}'
+Outputs:
+  AnsibleSQSCommandQueueArn:
+    Description: "ARN of SQS queue to be used to dispatch ansible playbooks"
+    Value: !GetAtt sopsCustomerSQSCommandQueue.Arn
+    Export:
+      Name: !Sub "${CustomerName}-sopsCustomerSQSCommandQueueArn"
+  AnsibleSQSCommandQueueUrl:
+      Description: "URL of SQS queue to be used to dispatch ansible playbooks"
+      Value: !Ref sopsCustomerSQSCommandQueue
+      Export:
+        Name: !Sub "${CustomerName}-sopsCustomerSQSCommandQueueUrl"
