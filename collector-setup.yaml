@@ -24,7 +24,7 @@
     # - import_tasks: "tasks/unattended-upgrades.yaml"
 
   post_tasks:
-    - name: Download foo.conf
+    - name: Download AWS CLI V2
       get_url:
         url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
         dest: /tmp/awscliv2.zip
@@ -37,7 +37,11 @@
       shell: /tmp/aws/install
     - name: "Initial AWS CLI config (create path and config files)"
       shell: "aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}"
-
+    - name: Install python packages
+      pip:
+        executable: /usr/bin/pip3
+        name:
+          - boto3
     - name: "Configure AWS CLI credentials"
       copy:
         dest: "/root/.aws/credentials"
@@ -46,7 +50,6 @@
                  aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
                  aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
                  region = {{ ansible_local.secureops.customer_info.aws_region }}
-
     - cron:
         name:   "Set ansible-pull to run regularly"
         minute:   "*/90"
@@ -56,3 +59,4 @@
         name:   "Phone Home script"
         minute: "*/30"
         job:    "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}/{{ ansible_local.secureops.customer_info.node | lower }}/data/phone_home /root/phone_home 2>/dev/null && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
+    -
