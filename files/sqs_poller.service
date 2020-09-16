@@ -1,7 +1,7 @@
 [Unit]
 Description=Python script that polls an SQS queue for commands
 [Service]
-# Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONUNBUFFERED=1
 User=ansible_poller
 Group=ansible_poller
 WorkingDirectory=/home/ansible_poller
