@@ -53,7 +53,9 @@ users:
     ssh_pwauth: False
     ssh-authorized-keys:
       - ${INITIAL_USER_SSH_KEY}
-
+  - name: ansible_poller
+    shell: /usr/sbin/nologin
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
 chpasswd:
   list: |
     ${INITIAL_USER_NAME}:${ROOT_PWD}
