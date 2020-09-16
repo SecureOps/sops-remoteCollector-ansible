@@ -3,6 +3,7 @@ set -e
 set -u
 
 ## LOAD required customer related vars
+SCRIPT=$( basename ${BASH_SOURCE[0]} )
 SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
 # SCRIPT_DIR=$( readlink ${SCRIPT_DIR} )
 . ${SCRIPT_DIR}/../vars.sh
