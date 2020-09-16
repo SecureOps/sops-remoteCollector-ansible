@@ -8,30 +8,32 @@
   connection: local
   become: yes
 
-  vars:
-    logstash_version: "6.3.2"
-
-  tasks:  
+  tasks:
     - fail:
-        msg: "not supported" 
-      when: ( ansible_distribution not in ['Ubuntu','Debian'] )
+        msg: "not supported"
+      when: ( ansible_distribution not in ['CentOS'] )
 
-    - apt: 
-        name:  ["python-minimal", "git", "ansible", "build-essential", "awscli", "openjdk-8-jdk-headless", "mailutils", "apt-listchanges"]
+    - yum:
+        name:  ["zip"]
         state: "latest"
         update_cache: "yes"
 
-    - import_tasks: "tasks/syslog-ng.yaml"
-    - import_tasks: "tasks/logstash.yaml"
-    - import_tasks: "tasks/firewall.yaml"
-    - import_tasks: "tasks/unattended-upgrades.yaml"
+    # - import_tasks: "tasks/syslog-ng.yaml"
+    # - import_tasks: "tasks/logstash.yaml"
+    # - import_tasks: "tasks/firewall.yaml"
+    # - import_tasks: "tasks/unattended-upgrades.yaml"
 
   post_tasks:
-
-    - name: "Initial AWS CLI config (create path and config files)" 
+    - name: Download AWS CLI v2
+      shell: curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    - name: Unzip AWS CLI
+      shell: unzip awscliv2.zip
+    - name: Install AWS CLI
+      shell: aws/install
+    - name: "Initial AWS CLI config (create path and config files)"
       shell: "aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}"
 
-    - name: "Configure AWS CLI credentials" 
+    - name: "Configure AWS CLI credentials"
       copy:
         dest: "/root/.aws/credentials"
         content: |
@@ -43,12 +45,12 @@
     - cron:
         name:   "Set ansible-pull to run regularly"
         minute:   "*/90"
-        job:    "ansible-pull -U {{ ansible_local.secureops.devops.ansible_pull_url}} {{ ansible_local.secureops.devops.ansible_pull_playbook }} > /var/log/last-ansible-pull.log 2>&1"
-  
+        job:    "ansible-pull -C {{ ansible_local.secureops.devops.ansible_pull_branch }} -U {{ ansible_local.secureops.devops.ansible_pull_url}} {{ ansible_local.secureops.devops.ansible_pull_playbook }} > /var/log/last-ansible-pull.log 2>&1"
+
     - cron:
         name:   "Phone Home script"
         minute: "*/30"
-        job:    "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}/data/phone_home /root/phone_home 2>/dev/null && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
+        job:    "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}-{{ ansible_local.secureops.customer_info.node | lower }}/data/phone_home /root/phone_home 2>/dev/null && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
 
 
   handlers:
