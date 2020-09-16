@@ -34,7 +34,7 @@
       file:
         owner: ansible_poller
         group: ansible_poller
-        path: /ansible_poller/.aws
+        path: /home/ansible_poller/.aws
         state: directory
         mode: 755
     - name: "Configure AWS CLI credentials"
