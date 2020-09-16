@@ -17,7 +17,7 @@ Resources:
   sopsRemoteNodeUser:
     Type: AWS::IAM::User
     Properties:
-      UserName: !Sub sopsCustomerRemoteNode-${CustomerName}
+      UserName: !Sub sopsCustomer-${CustomerName}-${RemoteNodeName}
       Path: !Sub /sops/customer/${CustomerName}/
       Policies:
         - PolicyName: !Sub sopsCustomerPolicy-${CustomerName}
@@ -52,13 +52,30 @@ Resources:
                 Action:
                   - cloudwatch:PutMetricData
                 Resource: "*"
+              - Effect: "Allow"
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:SendMessage
+                Resource:
+                  - "Fn::ImportValue": !Sub "${CustomerName}-sopsCustomerSQSCommandQueueArn"
+              - Effect: "Allow"
+                Action:
+                  - sqs:ListQueues
+                Resource:
+                  - "Fn::ImportValue": !Sub "${CustomerName}-sopsCustomerSQSCommandQueueArn"
+              - Effect: "Allow"
+                Action:
+                  - cf:DescribeStacks
+                Resource:
+                  - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/sopsCustomer-${CustomerName}*
   sopsRemoteNodeKey:
     Type: AWS::IAM::AccessKey
     DependsOn: sopsRemoteNodeUser
     Properties:
       Serial: 0
       Status: Active
-      UserName: !Sub sopsCustomerRemoteNode-${CustomerName}
+      UserName: !Sub sopsCustomer-${CustomerName}-${RemoteNodeName}
   RemoteNodeCreds:
     Type: AWS::SecretsManager::Secret
     Properties:
