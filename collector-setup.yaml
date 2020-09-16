@@ -12,11 +12,37 @@
     - fail:
         msg: "not supported"
       when: ( ansible_distribution not in ['CentOS'] )
-
     - yum:
         name:  ["zip"]
         state: "latest"
         update_cache: "yes"
+    - name: Set the AWS region
+      set_fact:
+        AWS_REGION: "{{ ansible_local.secureops.customer_info.aws_region }}"
+    - name: Placeholder for remote node stack name
+      set_fact:
+        tmp_node_stack_name: "sopsCustomer-{{ ansible_local.secureops.customer_info.name }}-{{ ansible_local.secureops.customer_info.node }}"
+    - name: Get Stack information for this node
+      cloudformation_info:
+        region: "{{ AWS_REGION }}"
+        profile: "{{ AWS_PROFILE | default('default') }}"
+        stack_name: "{{ tmp_node_stack_name }}"
+      register: node_template
+    - name: Set the SQS poller fact
+      set_fact:
+        ansible_sqs_queue_url: "{{ node_template.cloudformation[tmp_node_stack_name].stack_outputs.AnsibleSQSCommandQueueUrl }}"
+    - name: Copy ansible poller
+      copy:
+        src: files/sqs_poller.py
+        dest: /home/ansible_poller/sqs_poller.py
+        mode: 644
+        owner: ansible_poller
+        group: ansible_poller
+    - name: Copy ansible poller service script
+      copy:
+        src: files/sqs_poller.service
+        dest: dest: /usr/local/lib/systemd/system/sqs_poller.service
+
 
     # - import_tasks: "tasks/syslog-ng.yaml"
     # - import_tasks: "tasks/logstash.yaml"
@@ -50,6 +76,14 @@
                  aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
                  aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
                  region = {{ ansible_local.secureops.customer_info.aws_region }}
+    - name: "Configure AWS CLI credentials for ansible_poller user"
+      copy:
+        dest: "/home/ansible_poller/.aws/credentials"
+        content: |
+                 [default]
+                 aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
+                 aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
+                 region = {{ ansible_local.secureops.customer_info.aws_region }}
     - cron:
         name:   "Set ansible-pull to run regularly"
         minute:   "*/90"
@@ -59,4 +93,17 @@
         name:   "Phone Home script"
         minute: "*/30"
         job:    "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}/{{ ansible_local.secureops.customer_info.node | lower }}/data/phone_home /root/phone_home 2>/dev/null && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
-    -
+
+    - name: Install the SQS Poller's config.json
+      template:
+        src: templates/config.json.j2
+        dest: /home/ansible_poller/config.json
+        owner: ansible_poller
+        group: ansible_poller
+
+    - name: Install the sqs_poller service
+      systemd:
+        name: sqs_poller.service
+        enabled: yes
+        daemon_reload: yes
+        state: started

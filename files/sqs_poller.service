@@ -1,0 +1,10 @@
+[Unit]
+Description=Python script that polls an SQS queue for commands
+[Service]
+Environment=PYTHONUNBUFFERED=1
+User=ansible_poller
+Group=ansible_poller
+WorkingDirectory=/home/ansible_poller
+ExecStart=/usr/bin/python3 /home/ansible_poller/sqs_poller.py
+[Install]
+WantedBy=multi-user.target
