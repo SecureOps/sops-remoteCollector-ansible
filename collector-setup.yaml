@@ -25,11 +25,13 @@
 
   post_tasks:
     - name: Download AWS CLI v2
-      shell: curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      shell: curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/root/awscliv2.zip"
     - name: Unzip AWS CLI
-      shell: unzip awscliv2.zip
+      unarchive:
+        src: /root/awscliv2.zip
+        dest: /tmp
     - name: Install AWS CLI
-      shell: aws/install
+      shell: /tmp/aws/install
     - name: "Initial AWS CLI config (create path and config files)"
       shell: "aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}"
 
@@ -51,7 +53,3 @@
         name:   "Phone Home script"
         minute: "*/30"
         job:    "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}/{{ ansible_local.secureops.customer_info.node | lower }}/data/phone_home /root/phone_home 2>/dev/null && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
-
-
-  handlers:
-    - import_tasks: "tasks/handlers.yaml"
