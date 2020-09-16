@@ -90,6 +90,8 @@ yum_repos:
 packages:
   - git
   - ansible
+  - python38
+  - python38-pip
 
 runcmd:
 #  - 'echo "IP: \4" >> /etc/issue'
