@@ -16,6 +16,11 @@
         name:  ["zip"]
         state: "latest"
         update_cache: "yes"
+    - name: Install python packages
+      pip:
+        executable: /usr/bin/pip3
+        name:
+          - boto3
     - name: Set the AWS region
       set_fact:
         AWS_REGION: "{{ ansible_local.secureops.customer_info.aws_region }}"
@@ -69,11 +74,6 @@
       shell: /tmp/aws/install
     - name: "Initial AWS CLI config (create path and config files)"
       shell: "aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}"
-    - name: Install python packages
-      pip:
-        executable: /usr/bin/pip3
-        name:
-          - boto3
     - name: "Configure AWS CLI credentials"
       copy:
         dest: "/root/.aws/credentials"
