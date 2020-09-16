@@ -66,9 +66,9 @@ Resources:
                   - "Fn::ImportValue": !Sub "${CustomerName}-sopsCustomerSQSCommandQueueArn"
               - Effect: "Allow"
                 Action:
-                  - cf:DescribeStacks
+                  - cloudformation:DescribeStacks
                 Resource:
-                  - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/sopsCustomer-${CustomerName}*
+                  - !Sub arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/sopsCustomer-${CustomerName}-${RemoteNodeName}/*
   sopsRemoteNodeKey:
     Type: AWS::IAM::AccessKey
     DependsOn: sopsRemoteNodeUser
@@ -88,3 +88,10 @@ Resources:
             - !Sub '{"access_key": "${sopsRemoteNodeKey}", "access_secret": "'
             - !GetAtt sopsRemoteNodeKey.SecretAccessKey
             - '"}'
+Outputs:
+  AnsibleSQSCommandQueueUrl:
+      Description: "URL of SQS queue to be used to dispatch ansible playbooks"
+      Value:
+        "Fn::ImportValue": !Sub "${CustomerName}-sopsCustomerSQSCommandQueueUrl"
+      Export:
+        Name: !Sub "${CustomerName}-${RemoteNodeName}-sopsCustomerSQSCommandQueueUrl"
