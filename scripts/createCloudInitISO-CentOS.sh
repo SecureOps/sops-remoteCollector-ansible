@@ -98,7 +98,7 @@ runcmd:
 
 
 phone_home:
- url: ${PHONE_HOME_URL}/sopscustomer-${CUSTOMER_LOWER}/${INSTANCE_ID}/_data/cloud-init-report
+ url: ${PHONE_HOME_URL}/sopscustomer-${CUSTOMER_LOWER}/\$INSTANCE_ID/_data/cloud-init-report
  post:
   - pub_key_rsa
   - instance_id
