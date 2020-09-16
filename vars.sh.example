@@ -2,18 +2,21 @@
 
 AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-1}"
 CUSTOMER_NAME="${CUSTOMER_NAME:-testClient}"
+REMOTE_NODE_NAME="${REMOTE_NODE_NAME:-test01}"
 CUSTOMER_PATH="/sops/customers/${CUSTOMER_NAME}/"
-CF_FILE="createAWSResoucesCustomer_syslog_cf.json"  # Cloud Formation json file to use
-
-## LOAD customer user access key
-AWS_KEY_ID=$(  aws cloudformation describe-stacks --stack-name ${CUSTOMER_NAME}Stack | jq -r '.Stacks[0].Outputs[] | select( .OutputKey == "CustomerKeyId") | .OutputValue' )
-AWS_SEC_KEY=$( aws cloudformation describe-stacks --stack-name ${CUSTOMER_NAME}Stack | jq -r '.Stacks[0].Outputs[] | select( .OutputKey == "CustomerKey")   | .OutputValue' )
-
+CF_FILE="createAWSResourcesCustomer_cf.yaml"  # Cloud Formation json file to use
+REMOTE_NODE_CF_FILE="createAWSResourcesCustomer_remotenode_cf.yaml"
 
 INITIAL_USER_NAME="<foo>"
 INITIAL_USER_GECOS="<bar>"
 INITIAL_USER_SSH_KEY="<foo bar ssh public key>"
 
+if [[ $SCRIPT =~ "ISO" ]]; then
+  ## LOAD customer user access key only if we're creating an ISO
+  echo "Loading AWS secrets"
+  AWS_KEY_ID=$(aws secretsmanager get-secret-value --secret-id ${CUSTOMER_NAME}-${REMOTE_NODE_NAME}-RemoteNodeKey | jq -r '.SecretString' | jq -r '.access_key')
+  AWS_SEC_KEY=$(aws secretsmanager get-secret-value --secret-id ${CUSTOMER_NAME}-${REMOTE_NODE_NAME}-RemoteNodeKey | jq -r '.SecretString' | jq -r '.access_secret')
+fi
 
 
 ## Collector VM Network information (Comment for DHCP)
@@ -23,4 +26,3 @@ IP_CIDR="x.x.x.x/y"
 GATEWAY="x.x.x.x"
 NAMESERVER[0]="a.a.a.a"
 NAMESERVER[1]="a.a.a.a"
-
