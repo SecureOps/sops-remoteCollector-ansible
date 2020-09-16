@@ -16,9 +16,13 @@
         name:  ["zip"]
         state: "latest"
         update_cache: "yes"
-    - name: Install python packages
+    - name: Install python packages for the system
       pip:
         executable: /usr/bin/pip3
+        name:
+          - boto3
+    - name: Install python packages for ansible
+      pip:
         name:
           - boto3
     - name: Set the AWS region
