@@ -24,11 +24,14 @@
     # - import_tasks: "tasks/unattended-upgrades.yaml"
 
   post_tasks:
-    - name: Download AWS CLI v2
-      shell: curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/root/awscliv2.zip"
+    - name: Download foo.conf
+      get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /tmp/awscliv2.zip
+        mode: '0440'
     - name: Unzip AWS CLI
       unarchive:
-        src: /root/awscliv2.zip
+        src: /tmp/awscliv2.zip
         dest: /tmp
     - name: Install AWS CLI
       shell: /tmp/aws/install
