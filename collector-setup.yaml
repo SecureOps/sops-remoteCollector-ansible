@@ -23,6 +23,20 @@
     - name: Set the AWS region
       set_fact:
         AWS_REGION: "{{ ansible_local.secureops.customer_info.aws_region }}"
+    - name: Create the .aws directory for root
+      file:
+        owner: root
+        group: root
+        path: /root/.aws
+        state: directory
+        mode: 755
+    - name: Create the .aws directory for ansible_poller
+      file:
+        owner: ansible_poller
+        group: ansible_poller
+        path: /ansible_poller/.aws
+        state: directory
+        mode: 755
     - name: "Configure AWS CLI credentials"
       copy:
         dest: "/root/.aws/credentials"
