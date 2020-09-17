@@ -13,7 +13,7 @@
         msg: "not supported"
       when: ( ansible_distribution not in ['CentOS'] )
     - yum:
-        name:  ["zip"]
+        name:  ["zip","python3-systemd"]
         state: "latest"
         update_cache: "yes"
     - name: Install python packages (Python36)
