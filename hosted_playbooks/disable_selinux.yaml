@@ -12,5 +12,5 @@
       selinux:
         state: disabled
 
-- name: Reboot Host
-  reboot:
+    - name: Reboot Host
+      reboot:
