@@ -96,8 +96,36 @@ def process_payload(payload):
                         else:
                             cmd = "ansible-playbook {} -e ansible_host={}"
                             cmd = cmd.format(playbook, host)
-        elif command['command'] == 'ansible-pull':
-            pass
+        elif command == 'ansible-pull':
+            variables = "{}"
+            if 'params' not in payload:
+                output['message'] = "Failed, ansible-pull command needs params specified in payload"
+            else:
+                params = payload.get('params')
+                if 'playbook' not in params:
+                    output['message'] = "Failed, ansible-pull command needs to have playbook attribute set in params"
+                else:
+                    playbook = params.get('playbook')
+                    if 'host' not in params:
+                        output['message'] = "Failed, ansible-pull command needs to have host attribute set in params"
+                    if 'playbook_url' not in params:
+                        output['message'] = "Failed, ansible-pull needs to have playbook_url set in params"
+                    else:
+                        host_cli = str(f"-e ansible_host={params.get('host')}")
+                        branch_cli = ""
+                        if 'branch' in params:
+                            branch_cli = str(f"-C {params.get('branch')}")
+
+                        playbook_url_cli = str(f"-U {params.get('playbook_url')}")
+                        variables_cli = ""
+                        if 'variables' in params:
+                            try:
+                                variables = json.dumps(command['params']['variables'])
+                                variable_cli = str(f"-e '{variables}'" )
+                            except Exception as e:
+                                output['message'] = str("Failed to parse variables: {}").format(e.message)
+
+                        cmd = str(f'ansible-pull {branch_cli} {playbook_url_cli} {playbook} {host_cli} {variables_cli}')
 
         if cmd:
             process = subprocess.run(
@@ -160,50 +188,10 @@ if __name__ == '__main__':
                     # Decoding Body (json)
                     payload = json.loads( messageBody )
                     pprint.pprint( payload )
-
                     # Spawn a new process to handle the payload
                     payload_processor = mp.Process(target=process_payload, args=(payload,))
                     payload_processor.start()
                     print(f'Spawned process ID {payload_processor.pid}')
-                    # if 'command' in payload:
-                    #     print("command in payload")
-                    #     if payload['command'] == 'ansible':
-                    #         print("ansible in payload")
-                    #         playbook = "notspecified.yaml"
-                    #         variables = "{}"
-                    #         if 'params' in payload:
-                    #             print("params in payload")
-                    #             host = payload['params']['host']
-                    #             playbook = payload['params']['playbook']
-                    #             if 'variables' in payload['params']:
-                    #                 variables = json.dumps(payload['params']['variables'])
-                    #         cmd = "ansible-playbook {} -e '{}' -e ansible_host={}"
-                    #         cmd = cmd.format(playbook, variables, host)
-                    #         print("Executing " + cmd)
-                    #         process = subprocess.run(shlex.split(cmd), text=True, capture_output=True )
-                    #         rc = process.returncode
-                    #         output = ""
-                    #         if rc is not None and rc > 0 :
-                    #             output = output + '[WARNING] {}: Failed to run task ... \n'.format(getTimestamp() )
-                    #             responseStatus = "FAILED"
-                    #             output = output + process.stderr + '\n' + process.stdout + '\n'
-                    #         else:
-                    #             output = output + '[INFO] {}: task started... \n'.format(getTimestamp() )
-                    #             output = output + process.stdout
-                    #             responseStatus = "SUCCESS"
-                    #         print(output)
-                    #         response_data = {}
-                    #         response_data['output'] = clip_text(output)
-                    # if 'cloudformation' in payload:
-                    #     # CloudFormation doesn't like the reason to be too long, so clip it.
-                    #
-                    #     send( payload['cloudformation']['responseUrl'], responseStatus,
-                    #         payload['cloudformation']['stackId'],
-                    #         payload['cloudformation']['requestId'],
-                    #         payload['cloudformation']['logicalResourceId'],
-                    #         response_data,
-                    #         reason=output
-                    #     )
                 except Exception as e:
                     print('[ERROR] {}: Failed to decode message: {} - {}'.format(getTimestamp(), messageBody, str(e)))
 
