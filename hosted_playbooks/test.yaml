@@ -1,0 +1,14 @@
+---
+###
+### Simple playbook to test ansible-pull
+###
+
+- name:       "Test ansible_poller with ansible-pull"
+  hosts:      all, localhost
+  connection: local
+  become: no
+
+  tasks:
+    - debug:
+        msg: "Success!"
+      register: out
