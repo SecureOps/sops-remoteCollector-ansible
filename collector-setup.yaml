@@ -12,17 +12,21 @@
     - fail:
         msg: "not supported"
       when: ( ansible_distribution not in ['CentOS'] )
+    
     - yum:
-        name:  ["zip","python3-systemd"]
+        name:  ["zip","python3-systemd","wget"]
         state: "latest"
         update_cache: "yes"
+    
     - name: Install python packages (Python36)
       pip:
         name:
           - boto3
+    
     - name: Set the AWS region
       set_fact:
         AWS_REGION: "{{ ansible_local.secureops.customer_info.aws_region }}"
+    
     - name: Create the .aws directory for root
       file:
         owner: root
@@ -30,6 +34,7 @@
         path: /root/.aws
         state: directory
         mode: 755
+    
     - name: Create the .aws directory for ansible_poller
       file:
         owner: ansible_poller
@@ -37,6 +42,7 @@
         path: /home/ansible_poller/.aws
         state: directory
         mode: 755
+
     - name: "Configure AWS CLI credentials"
       copy:
         dest: "/root/.aws/credentials"
@@ -45,6 +51,7 @@
                  aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
                  aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
                  region = {{ AWS_REGION }}
+
     - name: "Configure AWS CLI credentials for ansible_poller user"
       copy:
         dest: "/home/ansible_poller/.aws/credentials"
@@ -53,18 +60,22 @@
                  aws_access_key_id = {{ ansible_local.secureops.customer_info.aws_key_id }}
                  aws_secret_access_key = {{ ansible_local.secureops.customer_info.aws_sec_key }}
                  region = {{ AWS_REGION }}
+
     - name: Placeholder for remote node stack name
       set_fact:
         tmp_node_stack_name: "sopsCustomer-{{ ansible_local.secureops.customer_info.name }}-{{ ansible_local.secureops.customer_info.node }}"
+
     - name: Get Stack information for this node
       cloudformation_info:
         region: "{{ AWS_REGION }}"
         profile: "{{ AWS_PROFILE | default('default') }}"
         stack_name: "{{ tmp_node_stack_name }}"
       register: node_template
+
     - name: Set the SQS poller fact
       set_fact:
         ansible_sqs_queue_url: "{{ node_template.cloudformation[tmp_node_stack_name].stack_outputs.AnsibleSQSCommandQueueUrl }}"
+
     - name: Copy ansible poller
       copy:
         src: files/sqs_poller.py
@@ -72,10 +83,12 @@
         mode: 644
         owner: ansible_poller
         group: ansible_poller
+
     - name: Copy ansible poller service script
       copy:
         src: files/sqs_poller.service
         dest: /usr/lib/systemd/system/sqs_poller.service
+
     - name: Install the SQS Poller's config.json
       template:
         src: templates/sqs_poller.config.json.j2
@@ -83,6 +96,8 @@
         owner: ansible_poller
         group: ansible_poller
 
+    
+    - import_tasks: tasks/gvm.yaml
     # - import_tasks: "tasks/syslog-ng.yaml"
     # - import_tasks: "tasks/logstash.yaml"
     # - import_tasks: "tasks/firewall.yaml"
@@ -94,23 +109,26 @@
         url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
         dest: /tmp/awscliv2.zip
         mode: '0440'
+    
     - name: Unzip AWS CLI
       unarchive:
         src: /tmp/awscliv2.zip
         dest: /tmp
+    
     - name: Install AWS CLI
-      shell: /tmp/aws/install
+      shell: /tmp/aws/install --update
+
     - name: "Initial AWS CLI config (create path and config files)"
       shell: "aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}"
     - cron:
-        name:   "Set ansible-pull to run regularly"
-        minute:   "*/90"
-        job:    "ansible-pull -C {{ ansible_local.secureops.devops.ansible_pull_branch }} -U {{ ansible_local.secureops.devops.ansible_pull_url}} {{ ansible_local.secureops.devops.ansible_pull_playbook }} > /var/log/last-ansible-pull.log 2>&1"
+        name: "Set ansible-pull to run regularly"
+        minute: "*/90"
+        job: "ansible-pull -C {{ ansible_local.secureops.devops.ansible_pull_branch }} -U {{ ansible_local.secureops.devops.ansible_pull_url}} {{ ansible_local.secureops.devops.ansible_pull_playbook }} > /var/log/last-ansible-pull.log 2>&1"
 
     - cron:
-        name:   "Phone Home script"
+        name: "Phone Home script"
         minute: "*/30"
-        job:    "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}/{{ ansible_local.secureops.customer_info.node | lower }}/data/phone_home /root/phone_home 2>/dev/null && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
+        job: "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}/{{ ansible_local.secureops.customer_info.node | lower }}/data/phone_home /root/phone_home 2>/dev/null && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
 
     - name: Install the sqs_poller service
       systemd:
