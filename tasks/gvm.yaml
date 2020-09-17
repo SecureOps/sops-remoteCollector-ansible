@@ -10,9 +10,9 @@
          wget -q -O - https://updates.atomicorp.com/installers/atomic | sh
 
 - name: "Enable Required Repositories"
-  yum_repository:
-    name: "PowerTools"
-    enabled: true
+  ignore_errors: true
+  shell: | 
+         yum config-manager --set-enabled PowerTools
 
 - name: "Install Pre-req packages"
   yum:
