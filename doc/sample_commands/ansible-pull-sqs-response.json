@@ -1,0 +1,12 @@
+{
+ "command": "ansible-pull",
+ "params": {
+    "playbook": "hosted_playbooks/test.yaml",
+    "branch": "centos8",
+    "playbook_url": "https://github.com/SecureOps/sops-remoteCollector-ansible.git",
+    "host": "localhost"
+  },
+  "sqs_response": {
+    "sqs_queue_url": "https://sqs.ca-central-1.amazonaws.com/123456789/scannerTest-CommandResponseQueue"
+  }
+}
