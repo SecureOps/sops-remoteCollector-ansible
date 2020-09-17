@@ -1,0 +1,16 @@
+---
+###
+### Disable SELinux and Reboot
+###
+
+- name: "Disable SELinux and Reboot"
+  hosts: all,localhost
+  connection: local
+
+  tasks:
+    - name: Disable SELinux
+      selinux:
+        state: disabled
+
+- name: Reboot Host
+  reboot:
