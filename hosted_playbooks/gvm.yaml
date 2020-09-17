@@ -51,7 +51,7 @@
   handlers:
 
     - name: "Restart gvmd"
-      servevice:
+      service:
         name: "gvmd"
         ensure: "restarted"
 
