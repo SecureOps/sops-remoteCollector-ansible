@@ -1,0 +1,20 @@
+---
+###
+### Install GVM (OpenVAS)
+###
+
+- name: "Install Atomic Repositories"
+  shell: | 
+         export NON_INT=1
+         wget -q -O - https://updates.atomicorp.com/installers/atomic | sh
+
+- name: "Enable Required Repositories"
+  yum_repository:
+    name: "PowerTools"
+    enabled: true
+
+#yum config-manager --set-enabled PowerTools
+# yum install epel-release
+# yum install gvm
+
+
