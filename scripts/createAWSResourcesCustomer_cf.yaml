@@ -10,6 +10,12 @@ Parameters:
     AllowedPattern: "[a-z][a-z0-9]*"
     Description: "Customer S3 Bucket Name, only lower case alphanumeric."
 Resources:
+  sopsRemoteNodeGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: !Sub sopsCustomer-${CustomerName}-RemoteNodeGroup
+      Path: !Sub /sops/customers/${CustomerName}/
+
   sopsCollectorUser:
     Type: AWS::IAM::User
     Properties:
@@ -55,6 +61,15 @@ Resources:
       Serial: 0
       Status: Active
       UserName: !Sub sopsCollector-${CustomerName}
+
+  sopsCustomerSQSCommandQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      KmsMasterKeyId: "alias/aws/sqs"
+      QueueName: !Sub ${CustomerName}-AnsibleCommandQueue
+      Tags:
+        - Key: Name
+          Value: !Sub ${CustomerName}-AnsibleCommandQueue
   sopsCustomerKinesisStreamCommand:
     Type: AWS::Kinesis::Stream
     DependsOn: sopsCollectorUser
@@ -67,14 +82,6 @@ Resources:
           Value: !Sub ${CustomerName}
         - Key: StreamType
           Value: command
-  sopsCustomerSQSCommandQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      KmsMasterKeyId: "alias/aws/sqs"
-      QueueName: !Sub ${CustomerName}-AnsibleCommandQueue
-      Tags:
-        - Key: Name
-          Value: !Sub ${CustomerName}-AnsibleCommandQueue
   sopsCustomerKinesisDeliverystreamCommandResults:
     Type: AWS::KinesisFirehose::DeliveryStream
     DependsOn: deliveryPolicy
@@ -113,6 +120,38 @@ Resources:
             Condition:
                 StringEquals:
                   "sts:ExternalId": !Ref AWS::AccountId
+  remoteNodeManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Basic remote node policy
+      ManagedPolicyName: !Sub sopsCustomer-${CustomerName}-remote-nodes
+      Path: !Sub /sops/customers/${CustomerName}/
+      Groups:
+        - !Ref sopsRemoteNodeGroup
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetBucketLocation
+              - s3:GetObject
+              - s3:PutObject
+              - s3:ListBucket
+              - s3:ListBucketMultipartUploads
+            Resource:
+              - !GetAtt s3bucket.Arn
+              - !Sub ${s3bucket.Arn}*
+          - Effect: Allow
+            Action:
+              - cloudwatch:PutMetricData
+            Resource: "*"
+          - Effect: "Allow"
+            Action:
+              - sqs:ReceiveMessage
+              - sqs:DeleteMessage
+              - sqs:SendMessage
+            Resource:
+              - !GetAtt sopsCustomerSQSCommandQueue.Arn
   deliveryPolicy:
     Type: "AWS::IAM::Policy"
     DependsOn: ["sopsCollectorUser", "s3bucket"]

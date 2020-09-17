@@ -4,8 +4,17 @@ AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-1}"
 CUSTOMER_NAME="${CUSTOMER_NAME:-testClient}"
 REMOTE_NODE_NAME="${REMOTE_NODE_NAME:-test01}"
 CUSTOMER_PATH="/sops/customers/${CUSTOMER_NAME}/"
-CF_FILE="createAWSResourcesCustomer_cf.yaml"  # Cloud Formation json file to use
+###
+# CloudFormation Files
+
+# file to use to create the base customer AWS assets
+CF_FILE="createAWSResourcesCustomer_cf.yaml"
+# File to use to create the SQS response queue (optional)
+CF_SQS_RESP_FILE="createAWSResourcesCustomer_response_sqs_queue_cf.yaml"
+# File to use to create the remote nodes
 REMOTE_NODE_CF_FILE="createAWSResourcesCustomer_remotenode_cf.yaml"
+#
+###
 
 INITIAL_USER_NAME="<foo>"
 INITIAL_USER_GECOS="<bar>"
