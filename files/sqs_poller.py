@@ -130,12 +130,13 @@ def process_payload(payload):
         if cmd:
             process = subprocess.run(
                 shlex.split(cmd),
-                text=True,
-                capture_output=True )
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
             rc = process.returncode
             output['shell'] = cmd
-            output['stderr'] +=  process.stderr + '\n'
-            output['stdout'] +=  process.stdout + '\n'
+            output['stderr'] +=  str(process.stderr) + '\n'
+            output['stdout'] +=  str(process.stdout) + '\n'
             output['rc'] = rc
             if rc is not None and rc > 0 :
                 output['message'] = '[WARNING] {}: Failed to run task ... \n'.format(getTimestamp() )
