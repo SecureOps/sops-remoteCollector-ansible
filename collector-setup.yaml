@@ -123,7 +123,7 @@
         dest: /tmp
 
     - name: Install AWS CLI
-      shell: /tmp/aws/install --update --bin-dir=/usr/bin
+      shell: /tmp/aws/install --update
 
     - name: "Initial AWS CLI config (create path and config files)"
       shell: "/usr/local/bin/aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}"
