@@ -53,5 +53,6 @@
     - name: "Restart gvmd"
       service:
         name: "gvmd"
-        ensure: "restarted"
+        state: "restarted"
+        enabled: "yes"
 
