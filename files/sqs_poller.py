@@ -144,7 +144,7 @@ def process_payload(payload, message_id):
                 output['message'] = '[INFO] {}: task started... \n'.format(getTimestamp() )
                 responseStatus = "SUCCESS"
                 output['responseStatus'] = responseStatus
-    print(output)
+    pprint.pprint( output )
 
     # Process the outputs
     if 'cloudformation' in payload:
@@ -163,20 +163,23 @@ def process_payload(payload, message_id):
             print("Failed to send response, sqs_response needs an sqs_queue_url attribute to be set")
         else:
             sqs = sqs = boto3.client('sqs', region_name=config['aws_region_name'])
-            sqs.send_message(
-                QueueUrl=sqs_response.get('sqs_queue_url'),
-                MessageBody=json.dumps(output),
-                MessageAttributes={
-                    'origin_message_id': {
-                        'StringValue': message_id,
-                        'DataType': 'string'
-                    },
-                    'responding_node': {
-                        'StringValue': config.get('node_name'),
-                        'DataType': 'string'
+            try:
+                sqs.send_message(
+                    QueueUrl=sqs_response.get('sqs_queue_url'),
+                    MessageBody=json.dumps(output),
+                    MessageAttributes={
+                        'origin_message_id': {
+                            'StringValue': message_id,
+                            'DataType': 'string'
+                        },
+                        'responding_node': {
+                            'StringValue': config.get('node_name'),
+                            'DataType': 'string'
+                        }
                     }
-                }
-            )
+                )
+            except Exception as e:
+                print(f"JSON dump of the output didn't work: {e.message}")
 
 if __name__ == '__main__':
     # Start our process pool
