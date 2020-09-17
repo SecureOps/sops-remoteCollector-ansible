@@ -130,7 +130,7 @@ then
     cat <<EOF > "${TMPDIR}/network-config"
 version: 2
 ethernets:
-  id0:
+  eth0:
     match:
       macaddress: "${MAC_ADDR}"
     addresses:
