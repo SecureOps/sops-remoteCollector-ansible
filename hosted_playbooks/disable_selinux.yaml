@@ -4,7 +4,7 @@
 ###
 
 - name: "Disable SELinux and Reboot"
-  hosts: all,localhost
+  hosts: localhost
   connection: local
 
   tasks:
@@ -12,5 +12,5 @@
       selinux:
         state: disabled
 
-- name: Reboot Host
-  reboot:
+    - name: Reboot Host
+      shell: "shutdown -r now"

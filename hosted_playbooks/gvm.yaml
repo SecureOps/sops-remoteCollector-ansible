@@ -4,19 +4,15 @@
 ###
 
 - name: "Install GVM (OpenVAS)"
-  hosts: all,localhost
+  hosts: localhost
   connection: local
 
   tasks:
-    - name: "Install Atomic Repositories"
+    - name: "Install Atomic Repositories and enable PowerTools repo"
       ignore_errors: true
       shell: | 
             export NON_INT=1
             wget -q -O - https://updates.atomicorp.com/installers/atomic | sh
-
-    - name: "Enable Required Repositories"
-      ignore_errors: true
-      shell: | 
             yum config-manager --set-enabled PowerTools
 
     - name: "Install Pre-req packages"
@@ -29,9 +25,34 @@
       yum:
         name: 
           - "gvm"
-          - "gvm-tools"
           - "python3-defusedxml"
           - "python3-lxml"
           - "python3-paramiko"
+          - "python3-pip"
+          - "python3-virtualenv"
         state: "latest"
         update_cache: "yes"
+
+    - name: Install python packages (Python36)
+      pip:
+        state: "latest"
+        name:
+          - "gvm-tools"
+
+    - name: "Ensure GVMD socket is accessible"
+      lineinfile:
+        path: "/etc/sysconfig/gvmd"
+        regexp: '^OPTIONS='
+        line: 'OPTIONS="--listen-mode 666"'
+      notify:
+        - "Restart gvmd"
+
+
+  handlers:
+
+    - name: "Restart gvmd"
+      service:
+        name: "gvmd"
+        state: "restarted"
+        enabled: "yes"
+
