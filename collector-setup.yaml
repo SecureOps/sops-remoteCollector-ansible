@@ -72,9 +72,12 @@
         stack_name: "{{ tmp_node_stack_name }}"
       register: node_template
 
-    - name: Set the SQS poller fact
+    - name: Set the SQS poller queue fact
       set_fact:
         ansible_sqs_queue_url: "{{ node_template.cloudformation[tmp_node_stack_name].stack_outputs.AnsibleSQSCommandQueueUrl }}"
+    - name: Set the SQS poller node fact
+      set_fact:
+        sqs_mask_node_name: "{{ ansible_local.secureops.customer_info.node }}"
 
     - name: Copy ansible poller configuration
       copy:
@@ -93,7 +96,8 @@
       copy:
         src: files/sqs_poller.service
         dest: /usr/lib/systemd/system/sqs_poller.service
-
+        owner: root
+        group: root
     - name: Install the SQS Poller's config.json
       template:
         src: templates/sqs_poller.config.json.j2
