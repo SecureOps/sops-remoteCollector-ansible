@@ -69,7 +69,6 @@
       copy:
         src: files/sqs_poller.py
         dest: /home/ansible_poller/sqs_poller.py
-        mode: 644
         owner: ansible_poller
         group: ansible_poller
     - name: Copy ansible poller service script
