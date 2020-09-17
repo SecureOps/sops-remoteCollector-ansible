@@ -96,7 +96,8 @@
       copy:
         src: files/sqs_poller.service
         dest: /usr/lib/systemd/system/sqs_poller.service
-
+        owner: ansible_poller
+        group: ansible_poller
     - name: Install the SQS Poller's config.json
       template:
         src: templates/sqs_poller.config.json.j2
