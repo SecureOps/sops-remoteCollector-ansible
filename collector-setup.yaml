@@ -75,6 +75,9 @@
     - name: Set the SQS poller fact
       set_fact:
         ansible_sqs_queue_url: "{{ node_template.cloudformation[tmp_node_stack_name].stack_outputs.AnsibleSQSCommandQueueUrl }}"
+    - name: Set the SQS poller fact
+      set_fact:
+        sqs_mask_node_name: "{{ ansible_local.secureops.customer_info.node }}"
 
     - name: Copy ansible poller configuration
       copy:

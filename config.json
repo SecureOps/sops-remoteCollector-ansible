@@ -1,0 +1,5 @@
+{
+  "aws_region_name":"ca-central-1",
+  "queue_url": "https://sqs.ca-central-1.amazonaws.com/701051990918/scannerTest-AnsibleCommandQueue",
+  "node_name": "bob"
+}
