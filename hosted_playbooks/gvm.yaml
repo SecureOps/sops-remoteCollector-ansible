@@ -33,11 +33,21 @@
         state: "latest"
         update_cache: "yes"
 
-    - name: Install python packages (Python36)
+    - name: "Install python packages"
       pip:
         state: "latest"
         name:
           - "gvm-tools"
+
+    - name: "Sync feeds"
+      shell: |
+             aws s3 sync s3://sops-public/gvm/gvm/scap-data/ /var/lib/gvm/scap-data/
+             aws s3 sync s3://sops-public/gvm/gvm/cert-data/ /var/lib/gvm/cert-data/
+             aws s3 sync s3://sops-public/gvm/openvas/plugins/ /var/lib/gvm/plugins/
+
+    - name: "rum gmv-setup"
+      shell: |
+             gvm-setup
 
     - name: "Ensure GVMD socket is accessible"
       lineinfile:
@@ -49,7 +59,6 @@
 
 
   handlers:
-
     - name: "Restart gvmd"
       service:
         name: "gvmd"
