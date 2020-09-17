@@ -44,4 +44,14 @@
         path: "/etc/sysconfig/gvmd"
         regexp: '^OPTIONS='
         line: 'OPTIONS="--listen-mode 666"'
+      notify:
+        - "Restart gvmd"
+
+
+  handlers:
+
+    - name: "Restart gvmd"
+      servevice:
+        name: "gvmd"
+        ensure: "restarted"
 
