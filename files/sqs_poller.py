@@ -178,7 +178,7 @@ def process_payload(payload, message_id):
                 },
                 MessageGroupId=config.get('node_name')
             )
-            
+
 if __name__ == '__main__':
     # Start our process pool
     mp.set_start_method('spawn')
