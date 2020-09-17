@@ -5,3 +5,4 @@ roles/
 vars.sh
 *.iso
 iso_temp_dir/
+ansible.cfg
