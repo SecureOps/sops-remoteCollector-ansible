@@ -8,10 +8,6 @@
   connection: local
 
   tasks:
-    - name: Disable SELinux
-      selinux:
-        state: disabled
-
     - name: "Install Atomic Repositories"
       ignore_errors: true
       shell: | 
