@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Create User and Resources for Secureops Customer logs shipping."
+Parameters:
+  CustomerName:
+    Type: String
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    Description: Customer Name, only alphanumeric.
+Resources:
+  sopsCustomerSQSCommandResponseQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      KmsMasterKeyId: "alias/aws/sqs"
+      QueueName: !Sub ${CustomerName}-CommandResponseQueue
+      Tags:
+        - Key: Name
+          Value: !Sub ${CustomerName}-CommandResponseQueue
+  sopsCustomerSQSCommandResponseQueueManagedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Allow to write messages to the customer response queue
+      ManagedPolicyName: !Sub sopsCustomer-${CustomerName}-write-sqs-response-queue
+      Path: !Sub /sops/customers/${CustomerName}/
+      Groups:
+        - !Sub sopsCustomer-${CustomerName}-RemoteNodeGroup
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - sqs:SendMessage
+            Resource:
+              - !GetAtt sopsCustomerSQSCommandResponseQueue.Arn
+
+Outputs:
+  AnsibleSQSCommandResponseQueueArn:
+    Description: "ARN of SQS response queue to be used to get command outputs"
+    Value: !GetAtt sopsCustomerSQSCommandResponseQueue.Arn
+    Export:
+      Name: !Sub "${CustomerName}-sopsCustomerSQSCommandResponseQueueArn"
+  AnsibleSQSCommandResponseQueueUrl:
+      Description: "URL of SQS response queue to be used to get command outputs"
+      Value: !Ref sopsCustomerSQSCommandResponseQueue
+      Export:
+        Name: !Sub "${CustomerName}-sopsCustomerSQSCommandResponseQueueUrl"

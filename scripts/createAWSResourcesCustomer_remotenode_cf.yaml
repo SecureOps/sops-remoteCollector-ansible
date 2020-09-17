@@ -19,6 +19,8 @@ Resources:
     Properties:
       UserName: !Sub sopsCustomer-${CustomerName}-${RemoteNodeName}
       Path: !Sub /sops/customer/${CustomerName}/
+      Groups:
+        - !Sub sopsCustomer-${CustomerName}-RemoteNodeGroup
       Policies:
         - PolicyName: !Sub sopsCustomerPolicy-${CustomerName}
           PolicyDocument:
@@ -37,33 +39,6 @@ Resources:
                   - firehose:PutRecordBatch
                 Resource:
                   - !Sub arn:aws:firehose:${AWS::Region}:*:deliverystream/sopsCustomer-${CustomerName}-*
-              - Effect: Allow
-                Action:
-                  - s3:GetBucketLocation
-                  - s3:GetObject
-                  - s3:PutObject
-                  - s3:ListBucket
-                  - s3:ListBucketMultipartUploads
-                  - cloudwatch:PutMetricData
-                Resource:
-                  - !Sub arn:aws:s3:::sopscustomer-${CustomerS3BucketName}
-                  - !Sub arn:aws:s3:::sopscustomer-${CustomerS3BucketName}*
-              - Effect: Allow
-                Action:
-                  - cloudwatch:PutMetricData
-                Resource: "*"
-              - Effect: "Allow"
-                Action:
-                  - sqs:ReceiveMessage
-                  - sqs:DeleteMessage
-                  - sqs:SendMessage
-                Resource:
-                  - "Fn::ImportValue": !Sub "${CustomerName}-sopsCustomerSQSCommandQueueArn"
-              - Effect: "Allow"
-                Action:
-                  - sqs:ListQueues
-                Resource:
-                  - "Fn::ImportValue": !Sub "${CustomerName}-sopsCustomerSQSCommandQueueArn"
               - Effect: "Allow"
                 Action:
                   - cloudformation:DescribeStacks

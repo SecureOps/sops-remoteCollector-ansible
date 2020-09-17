@@ -59,7 +59,7 @@ def cf_send(responseUrl, responseStatus, stackId, requestId, logicalResourceId, 
     except Exception as e:
         print("send(..) failed executing http.request(..): " + str(e))
 
-def process_payload(payload):
+def process_payload(payload, message_id):
     output = {}
 
     # Preset this so we don't need to set it unless we have success
@@ -157,7 +157,28 @@ def process_payload(payload):
             clip_text(output.get('stderr' or output.get('message'))),
             reason=clip_text(output.get('stdout') or output.get('message'))
         )
-
+    if payload.get('sqs_response'):
+        sqs_response = payload.get('sqs_response')
+        if 'sqs_queue_url' not in sqs_response:
+            print("Failed to send response, sqs_response needs an sqs_queue_url attribute to be set")
+        else:
+            sqs = sqs = boto3.client('sqs', region_name=config['aws_region_name'])
+            sqs.send_message(
+                QueueUrl=sqs_response.get('sqs_queue_url'),
+                MessageBody=json.dumps(output),
+                MessageAttributes={
+                    'origin_message_id': {
+                        'StringValue': message_id,
+                        'DataType': 'string'
+                    },
+                    'responding_node': {
+                        'StringValue': config.get('node_name'),
+                        'DataType': 'string'
+                    }
+                },
+                MessageGroupId=config.get('node_name')
+            )
+            
 if __name__ == '__main__':
     # Start our process pool
     mp.set_start_method('spawn')
@@ -183,7 +204,8 @@ if __name__ == '__main__':
             if 'Messages' in response.keys():
                 for message in response.get('Messages'):
                     messageBody = message['Body']
-                    receipt_handle = message['ReceiptHandle']
+                    receipt_handle = message.get('ReceiptHandle')
+                    message_id = message.get('MessageId')
                     if message.get('MessageAttributes') and 'node_target' in message.get('MessageAttributes') and 'StringValue' in message.get('MessageAttributes').get('node_target'):
                         if config.get('node_name') and config.get('node_name') == message.get('MessageAttributes').get('node_target').get('StringValue'):
                             try:
@@ -191,7 +213,7 @@ if __name__ == '__main__':
                                 payload = json.loads( messageBody )
                                 pprint.pprint( payload )
                                 # Spawn a new process to handle the payload
-                                payload_processor = mp.Process(target=process_payload, args=(payload,))
+                                payload_processor = mp.Process(target=process_payload, args=(payload,message_id,))
                                 payload_processor.start()
                                 print(f'Spawned process ID {payload_processor.pid}')
                             except Exception as e:
