@@ -6,7 +6,9 @@
 - name:       "Test ansible_poller with ansible-pull"
   hosts:      all,localhost
   connection: local
-  become: no
+  gather_facts: false
+  become: false
+
 
   tasks:
     - debug:
