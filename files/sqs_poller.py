@@ -175,8 +175,7 @@ def process_payload(payload, message_id):
                         'StringValue': config.get('node_name'),
                         'DataType': 'string'
                     }
-                },
-                MessageGroupId=config.get('node_name')
+                }
             )
 
 if __name__ == '__main__':
