@@ -180,30 +180,30 @@ if __name__ == '__main__':
                 WaitTimeSeconds=0
             )
 
-            if ( 'Messages' in response.keys() ):
-                message = response['Messages'][0]
-                messageBody = message['Body']
-                receipt_handle = message['ReceiptHandle']
-                # responseStatus = "FAILED"
-                try:
-                    # Decoding Body (json)
-                    payload = json.loads( messageBody )
-                    pprint.pprint( payload )
-                    # Spawn a new process to handle the payload
-                    payload_processor = mp.Process(target=process_payload, args=(payload,))
-                    payload_processor.start()
-                    print(f'Spawned process ID {payload_processor.pid}')
-                except Exception as e:
-                    print('[ERROR] {}: Failed to decode message: {} - {}'.format(getTimestamp(), messageBody, str(e)))
+            if 'Messages' in response.keys():
+                for message in response.get('Messages'):
+                    messageBody = message['Body']
+                    receipt_handle = message['ReceiptHandle']
+                    if message.get('MessageAttributes') and 'node_target' in message.get('MessageAttributes') and 'StringValue' in message.get('MessageAttributes').get('node_target'):
+                        if config.get('node_name') and config.get('node_name') == message.get('MessageAttributes').get('node_target').get('StringValue'):
+                            try:
+                                # Decoding Body (json)
+                                payload = json.loads( messageBody )
+                                pprint.pprint( payload )
+                                # Spawn a new process to handle the payload
+                                payload_processor = mp.Process(target=process_payload, args=(payload,))
+                                payload_processor.start()
+                                print(f'Spawned process ID {payload_processor.pid}')
+                            except Exception as e:
+                                print('[ERROR] {}: Failed to decode message: {} - {}'.format(getTimestamp(), messageBody, str(e)))
 
-                # Delete received message from queue
-                print("Deleting message: " + receipt_handle)
-                sqs.delete_message(
-                    QueueUrl=config['queue_url'],
-                    ReceiptHandle=receipt_handle
-                )
-
-                print('[INFO] {}: Task received and being processed: {}'.format(getTimestamp(), message['MessageId']) )
+                            # Delete received message from queue
+                            print("Deleting message: " + receipt_handle)
+                            sqs.delete_message(
+                                QueueUrl=config['queue_url'],
+                                ReceiptHandle=receipt_handle
+                            )
+                            print('[INFO] {}: Task received and being processed: {}'.format(getTimestamp(), message['MessageId']) )
             time.sleep(5)
         except Exception as err:
             # boto client can "miss" credentials calls to the metadata service sometimes.
