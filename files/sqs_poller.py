@@ -170,11 +170,11 @@ def process_payload(payload, message_id):
                     MessageAttributes={
                         'origin_message_id': {
                             'StringValue': message_id,
-                            'DataType': 'string'
+                            'DataType': 'String'
                         },
                         'responding_node': {
                             'StringValue': config.get('node_name'),
-                            'DataType': 'string'
+                            'DataType': 'String'
                         }
                     }
                 )
