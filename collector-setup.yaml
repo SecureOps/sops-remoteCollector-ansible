@@ -12,21 +12,21 @@
     - fail:
         msg: "not supported"
       when: ( ansible_distribution not in ['CentOS'] )
-    
+
     - yum:
         name:  ["zip","python3-systemd","wget"]
         state: "latest"
         update_cache: "yes"
-    
+
     - name: Install python packages (Python36)
       pip:
         name:
           - boto3
-    
+
     - name: Set the AWS region
       set_fact:
         AWS_REGION: "{{ ansible_local.secureops.customer_info.aws_region }}"
-    
+
     - name: Create the .aws directory for root
       file:
         owner: root
@@ -34,7 +34,7 @@
         path: /root/.aws
         state: directory
         mode: 755
-    
+
     - name: Create the .aws directory for ansible_poller
       file:
         owner: ansible_poller
@@ -76,6 +76,12 @@
       set_fact:
         ansible_sqs_queue_url: "{{ node_template.cloudformation[tmp_node_stack_name].stack_outputs.AnsibleSQSCommandQueueUrl }}"
 
+    - name: Copy ansible poller configuration
+      copy:
+        src: files/ansible.cfg
+        dest: /home/ansible_poller/.ansible.cfg
+        owner: ansible_poller
+        group: ansible_poller
     - name: Copy ansible poller
       copy:
         src: files/sqs_poller.py
@@ -95,7 +101,7 @@
         owner: ansible_poller
         group: ansible_poller
 
-    
+
     - import_tasks: tasks/gvm.yaml
     # - import_tasks: "tasks/syslog-ng.yaml"
     # - import_tasks: "tasks/logstash.yaml"
@@ -108,12 +114,12 @@
         url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
         dest: /tmp/awscliv2.zip
         mode: '0440'
-    
+
     - name: Unzip AWS CLI
       unarchive:
         src: /tmp/awscliv2.zip
         dest: /tmp
-    
+
     - name: Install AWS CLI
       shell: /tmp/aws/install --update
 
