@@ -3,8 +3,8 @@
 ### Install and Configure a Remote Collector
 ###
 
-- name:       "Configure SecureOPS log collector"
-  hosts:      localhost
+- name: "Configure SecureOPS log collector"
+  hosts: localhost
   connection: local
   become: yes
 
@@ -104,8 +104,6 @@
         owner: ansible_poller
         group: ansible_poller
 
-
-    - import_tasks: tasks/gvm.yaml
     # - import_tasks: "tasks/syslog-ng.yaml"
     # - import_tasks: "tasks/logstash.yaml"
     # - import_tasks: "tasks/firewall.yaml"

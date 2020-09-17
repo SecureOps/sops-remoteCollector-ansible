@@ -1,0 +1,37 @@
+---
+###
+### Install GVM (OpenVAS)
+###
+
+- name: "Install GVM (OpenVAS)"
+  hosts: all,localhost
+  connection: local
+
+  tasks:
+    - name: "Install Atomic Repositories"
+      ignore_errors: true
+      shell: | 
+            export NON_INT=1
+            wget -q -O - https://updates.atomicorp.com/installers/atomic | sh
+
+    - name: "Enable Required Repositories"
+      ignore_errors: true
+      shell: | 
+            yum config-manager --set-enabled PowerTools
+
+    - name: "Install Pre-req packages"
+      yum:
+        name: "epel-release"
+        state: "latest"
+        update_cache: "yes"
+
+    - name: "Install packages"
+      yum:
+        name: 
+          - "gvm"
+          - "gvm-tools"
+          - "python3-defusedxml"
+          - "python3-lxml"
+          - "python3-paramiko"
+        state: "latest"
+        update_cache: "yes"
