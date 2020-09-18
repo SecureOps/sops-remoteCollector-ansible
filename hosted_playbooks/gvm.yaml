@@ -53,6 +53,18 @@
         dest: "/"
         creates: "/var/lib/gvm/scap-data/nvdcve-2.0-2020.xml"
 
+    - name: "Fix permissions for feed dirs"
+      file:
+        owner: "gvm"
+        group: "gvm"
+        path: "{{ item }}"
+        recurse: yes
+      loop:
+        - "/var/lib/gvm/cert-data"
+        - "/var/lib/gvm/plugins"
+        - "/var/lib/gvm/scap-data"
+
+
     ## *** Not using gmv-setup from atomicorp as it's not "unattended" friendly
     ## *** tasks below do the same
 

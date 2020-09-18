@@ -18,10 +18,33 @@
         state: "latest"
         update_cache: "yes"
 
-    - name: Install python packages (Python36)
+    - name: "Install python packages"
       pip:
         name:
           - boto3
+
+    ######
+    ## Install AWS CLI
+    ## 
+    - name: Download AWS CLI V2
+      get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /tmp/awscliv2.zip
+        mode: '0440'
+
+    - name: Unzip AWS CLI
+      unarchive:
+        src: /tmp/awscliv2.zip
+        dest: /tmp
+
+    - name: Install AWS CLI
+      shell: /tmp/aws/install --update
+
+    - name: "Initial AWS CLI config (create path and config files)"
+      shell: "/usr/local/bin/aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}"
+    ##
+    ## 
+    ######
 
     - name: Set the AWS region
       set_fact:
@@ -29,19 +52,19 @@
 
     - name: Create the .aws directory for root
       file:
-        owner: root
-        group: root
-        path: /root/.aws
-        state: directory
-        mode: 755
+        owner: "root"
+        group: "root"
+        path: "/root/.aws"
+        state: "directory"
+        mode: "0755"
 
     - name: Create the .aws directory for ansible_poller
       file:
-        owner: ansible_poller
-        group: ansible_poller
-        path: /home/ansible_poller/.aws
+        owner: "ansible_poller"
+        group: "ansible_poller"
+        path: "/home/ansible_poller/.aws"
         state: directory
-        mode: 755
+        mode: "0755"
 
     - name: "Configure AWS CLI credentials"
       copy:
@@ -72,12 +95,13 @@
         stack_name: "{{ tmp_node_stack_name }}"
       register: node_template
 
+    ######
+    ## Install and config SQL POLLER Service
+    ## 
     - name: Set the SQS poller queue fact
       set_fact:
         ansible_sqs_queue_url: "{{ node_template.cloudformation[tmp_node_stack_name].stack_outputs.AnsibleSQSCommandQueueUrl }}"
-    - name: Set the SQS poller node fact
-      set_fact:
-        sqs_mask_node_name: "{{ ansible_local.secureops.customer_info.node }}"
+        sqs_mask_node_name: "{{ ansible_local.secureops.customer_info.node }}"        
 
     - name: Copy ansible poller configuration
       copy:
@@ -85,6 +109,7 @@
         dest: /home/ansible_poller/.ansible.cfg
         owner: ansible_poller
         group: ansible_poller
+
     - name: Copy ansible poller
       copy:
         src: files/sqs_poller.py
@@ -98,6 +123,7 @@
         dest: /usr/lib/systemd/system/sqs_poller.service
         owner: root
         group: root
+
     - name: Install the SQS Poller's config.json
       template:
         src: templates/sqs_poller.config.json.j2
@@ -105,28 +131,16 @@
         owner: ansible_poller
         group: ansible_poller
 
-    # - import_tasks: "tasks/syslog-ng.yaml"
-    # - import_tasks: "tasks/logstash.yaml"
-    # - import_tasks: "tasks/firewall.yaml"
-    # - import_tasks: "tasks/unattended-upgrades.yaml"
+    - name: "Install the sqs_poller service"
+      systemd:
+        name: "sqs_poller.service"
+        enabled: yes
+        daemon_reload: yes
+        state: "started"
+    ##
+    ## 
+    ######
 
-  post_tasks:
-    - name: Download AWS CLI V2
-      get_url:
-        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
-        dest: /tmp/awscliv2.zip
-        mode: '0440'
-
-    - name: Unzip AWS CLI
-      unarchive:
-        src: /tmp/awscliv2.zip
-        dest: /tmp
-
-    - name: Install AWS CLI
-      shell: /tmp/aws/install --update
-
-    - name: "Initial AWS CLI config (create path and config files)"
-      shell: "/usr/local/bin/aws configure set default.region {{ ansible_local.secureops.customer_info.aws_region }}"
     - cron:
         name: "Set ansible-pull to run regularly"
         minute: "*/90"
@@ -137,9 +151,3 @@
         minute: "*/30"
         job: "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}/{{ ansible_local.secureops.customer_info.node | lower }}/data/phone_home /root/phone_home 2>/dev/null && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
 
-    - name: Install the sqs_poller service
-      systemd:
-        name: sqs_poller.service
-        enabled: yes
-        daemon_reload: yes
-        state: started
