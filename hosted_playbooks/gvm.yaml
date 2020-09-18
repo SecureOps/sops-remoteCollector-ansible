@@ -8,7 +8,11 @@
   connection: local
   become: yes
 
-  tasks:
+  tasks:  
+    - name: "Change SELinux"
+      selinux:
+        state: permissive
+
     - name: "Install Atomic Repositories and enable PowerTools repo"
       ignore_errors: true
       args:
@@ -43,12 +47,16 @@
         name:
           - "gvm-tools"
 
-    - name: "Download initial database files"
+
+    ######
+    ## Download Feeds
+    ## 
+    - name: "Download Feeds"
       get_url:
         url: "https://sops-public.s3.amazonaws.com/gvm/gvm.tar.gz"
         dest: "/tmp/gvm.tar.gz"
 
-    - name: "Extract initial database"
+    - name: "Extract initial feed data"
       unarchive:
         src: "/tmp/gvm.tar.gz"
         dest: "/"
@@ -65,9 +73,33 @@
         - "/var/lib/gvm/plugins"
         - "/var/lib/gvm/scap-data"
 
-
+    ##############
     ## *** Not using gmv-setup from atomicorp as it's not "unattended" friendly
     ## *** tasks below do the same
+
+    - name: "Run greenbone sync script"
+      args:
+        executable: "/bin/bash"
+      shell: |
+              echo
+              echo "Updating NVTs...."
+              su - gvm -c "/usr/bin/greenbone-nvt-sync"
+
+              echo
+              echo "Updating GVMD_DATA..."
+              su - gvm -c "/usr/sbin/greenbone-feed-sync --type GVMD_DATA"
+
+              echo
+              echo "Updating SCAP data..."
+              su - gvm -c "/usr/sbin/greenbone-feed-sync --type SCAP"
+
+              echo
+              echo "Updating CERT data..."
+              su - gvm -c "/usr/sbin/greenbone-feed-sync --type CERT"
+
+              echo
+              echo "Updating VT Info..."
+              su - gvm -c "openvas --update-vt-info"
 
     - name: "Set up postgres"
       args:
@@ -110,7 +142,6 @@
       notify:
         - "Restart redis"
 
-
     - name: "Redis cfg 4"
       lineinfile:
         path: "/etc/redis.conf"
@@ -142,6 +173,16 @@
                 grub2-editenv - set "$(grub2-editenv - list | grep kernelopts) transparent_hugepage=never"
               fi
 
+    - name: "Updating GVM Certificates"
+      args:
+        executable: "/bin/bash"
+      shell: |
+              echo -n "Updating OpenVAS Manager certificates: "
+              su - gvm -c "/usr/bin/gvm-manage-certs -V"
+              if [ $? -ne 0 ]; then
+                su - gvm -c "/usr/bin/gvm-manage-certs -a"
+              fi
+
     - sysctl:
         name: net.core.somaxconn
         value: '1024'
@@ -164,8 +205,7 @@
       notify:
         - "Restart gvmd"
 
-
-    ##
+    #####
     ## Enables Services
     ##    
     - name: "Enable/Start services"
@@ -174,7 +214,7 @@
         state: "started"
         enabled: "yes"
       loop:
-        - postgres
+        - postgresql
         - redis
         - ospd-openvas
         - gvmd
@@ -190,7 +230,6 @@
               if ! $(su - gvm -c "/usr/sbin/gvmd --get-users | grep -q ^admin$") ; then
                 su - gvm -c "/usr/sbin/gvmd  --create-user=admin > /dev/null 2>&1"
                 su - gvm -c "/usr/sbin/gvmd  --user=admin --new-password=\"{{ gvm_admin_pass }}\""
-
                 FEED_OWNER=$(su - gvm -c "/usr/sbin/gvmd --get-users --verbose" | awk '/^admin / {print $2}')
                 su - gvm -c "/usr/sbin/gvmd --modify-setting 78eceaec-3385-11ea-b237-28d24461215b --value ${FEED_OWNER}"
               fi
