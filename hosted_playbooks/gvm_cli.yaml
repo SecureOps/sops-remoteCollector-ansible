@@ -25,6 +25,7 @@
       args:
         executable: "/bin/bash"
       shell: |
+              echo $PATH
               gvm-cli --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock --xml "<get_version/>"
 
 
