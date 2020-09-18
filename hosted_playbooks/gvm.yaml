@@ -10,6 +10,8 @@
   tasks:
     - name: "Install Atomic Repositories and enable PowerTools repo"
       ignore_errors: true
+      args:
+        executable: "/bin/bash"
       shell: | 
             export NON_INT=1
             wget -q -O - https://updates.atomicorp.com/installers/atomic | sh
@@ -25,6 +27,7 @@
       yum:
         name: 
           - "gvm"
+          - "firewalld"
           - "python3-defusedxml"
           - "python3-lxml"
           - "python3-paramiko"
@@ -39,16 +42,105 @@
         name:
           - "gvm-tools"
 
-    #- name: "Sync feeds"
-    #  ignore_errors: true
-    #  shell: |
-    #         aws s3 sync --quiet --size-only --delete s3://sops-public/gvm/gvm/scap-data/ /var/lib/gvm/scap-data/ 
-    #         aws s3 sync --quiet --size-only --delete s3://sops-public/gvm/gvm/cert-data/ /var/lib/gvm/cert-data/
-    #         aws s3 sync --quiet --size-only --delete s3://sops-public/gvm/openvas/plugins/ /var/lib/gvm/plugins/
+    - name: "Download initial database files"
+      get_url:
+        url: "https://sops-public.s3.amazonaws.com/gvm/gvm.tar.gz"
+        dest: "/tmp/gvm.tar.gz"
 
-    - name: "rum gmv-setup"
+    - name: "Extract initial database"
+      unarchive:
+      src: "/tmp/gvm.tar.gz"
+      dest: "/"
+
+    ## *** Not using gmv-setup from atomicorp as it's not "unattended" friendly
+    ## *** tasks below do the same
+
+    - name: "Set up postgres"
+      args:
+        executable: "/bin/bash"
       shell: |
-             gvm-setup
+              if [ ! -f /var/lib/pgsql/initdb_postgresql.log ]; then
+                      postgresql-setup --initdb --unit postgresql
+                      systemctl enable postgresql
+                      systemctl start postgresql
+                      su - postgres -c "createuser -DRS gvm"
+                      su - postgres -c "createdb -O gvm gvmd"
+                      su - postgres -c "psql gvmd -q --command='create role dba with superuser noinherit;'"
+                      su - postgres -c "psql gvmd -q --command='grant dba to gvm;'"
+                      su - postgres -c "psql gvmd -q --command='create extension \"uuid-ossp\";'"
+                      su - postgres -c "psql gvmd -q --command='create extension \"pgcrypto\";'"
+                      systemctl restart postgresql
+              fi
+
+    - name: "Redis cfg 1"
+      lineinfile:
+        path: "/etc/redis.conf"
+        regexp: '^(#.)?unixsocket'
+        line: 'unixsocket /var/run/redis/redis.sock'
+      notify:
+        - "Restart redis"
+
+    - name: "Redis cfg 2"
+      lineinfile:
+        path: "/etc/redis.conf"
+        regexp: '^(#.)?unixsocketperm'
+        line: 'unixsocketperm 770'
+      notify:
+        - "Restart redis"
+
+    - name: "Redis cfg 3"
+      lineinfile:
+        path: "/etc/redis.conf"
+        regexp: '^(#.)?port'
+        line: 'port 0'
+      notify:
+        - "Restart redis"
+
+
+    - name: "Redis cfg 4"
+      lineinfile:
+        path: "/etc/redis.conf"
+        regexp: '^(#.)?databases'
+        line: 'databases 512'
+      notify:
+        - "Restart redis"
+
+    - name: "Openvassd 1"
+      lineinfile:
+        path: "/etc/openvas/openvas.conf"
+        regexp: '^(#.)?db_address='
+        line: 'db_address=/var/run/redis/redis.sock'
+
+    - name: "Other modification (via shell)"
+      args:
+        executable: "/bin/bash"
+      shell: |
+              # Bugfix for openvas (temporary)
+              sed -i "s/^save/#save/g" /etc/redis.conf
+
+              # Add uer to redis socket
+              if ! groups gvm |grep -q redis ; then
+                      usermod -aG redis gvm
+              fi
+
+              #Disable transparent hugepages
+              if ! $(grub2-editenv - list | grep -q transparent_hugepage=never) ; then
+                grub2-editenv - set "$(grub2-editenv - list | grep kernelopts) transparent_hugepage=never"
+              fi
+
+    - sysctl:
+        name: net.core.somaxconn
+        value: '1024'
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+    - sysctl:
+        name: vm.overcommit_memory
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
 
     - name: "Ensure GVMD socket is accessible"
       lineinfile:
@@ -59,10 +151,49 @@
         - "Restart gvmd"
 
 
+    ##
+    ## Enables Services
+    ##    
+    - name: "Enable/Start services"
+      service:
+        name: "{{ item }}"
+        state: "started"
+        enabled: "yes"
+      loop:
+        - postgres
+        - redis
+        - ospd-openvas
+        - gvmd
+        - gsad
+
+    - set_fact:
+        gvm_admin_pass: "{{ lookup('password', '/root/.local_gvm_admin_password' ) }}"
+
+    - name: "Create gvm admin user"
+      args:
+        executable: "/bin/bash"
+      shell: |
+              if ! $(su - gvm -c "/usr/sbin/gvmd --get-users | grep -q ^admin$") ; then
+                su - gvm -c "/usr/sbin/gvmd  --create-user=admin > /dev/null 2>&1"
+                su - gvm -c "/usr/sbin/gvmd  --user=admin --new-password=\"{{ gvm_admin_pass }}\""
+
+                FEED_OWNER=$(su - gvm -c "/usr/sbin/gvmd --get-users --verbose" | awk '/^admin / {print $2}')
+                su - gvm -c "/usr/sbin/gvmd --modify-setting 78eceaec-3385-11ea-b237-28d24461215b --value ${FEED_OWNER}"
+              fi
+
   handlers:
     - name: "Restart gvmd"
       service:
         name: "gvmd"
         state: "restarted"
-        enabled: "yes"
+
+    - name: "Restart redis"
+      service:
+        name: "redis"
+        state: "restarted"
+
+    - name: "Restart ospd-openvas"
+      service:
+        name: "ospd-openvas"
+        state: "restarted"
 
