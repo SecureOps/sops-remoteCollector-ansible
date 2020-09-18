@@ -9,10 +9,10 @@
   become: yes
 
   tasks:  
-    - name: "Change SELinux"
-      selinux:
-        state: "permissive"
-        policy: "targeted"
+    - name: "Check SELinux Status"
+      when: ( ansible_selinux.status != "disabled")
+      fail:
+        msg: "ERROR: SELinux must be disabled"
 
     - name: "Install Atomic Repositories and enable PowerTools repo"
       ignore_errors: true
