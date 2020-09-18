@@ -6,6 +6,7 @@
 - name: "Disable SELinux and Reboot"
   hosts: localhost
   connection: local
+  become: yes
 
   tasks:
     - name: Disable SELinux
