@@ -1,0 +1,22 @@
+---
+###
+### Simple playbook to test ansible-pull
+###
+
+- name:       "Test ansible_poller with ansible-pull"
+  hosts:      all,localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Download Big CentOS image
+      get_url:
+        url: https://cloud.centos.org/centos/8/x86_64/images/CentOS-8-GenericCloud-8.1.1911-20200113.3.x86_64.qcow2
+        dest: /tmp/centos-img.qcow2
+        mode: '0440'
+    - name: Delete the CentOS image
+      file:
+        path: /tmp/centos-img.qcow2
+        state: absent
+    - debug:
+        msg: "Success!"
+      register: out
