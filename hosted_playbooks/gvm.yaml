@@ -11,7 +11,8 @@
   tasks:  
     - name: "Change SELinux"
       selinux:
-        state: permissive
+        state: "permissive"
+        policy: "targeted"
 
     - name: "Install Atomic Repositories and enable PowerTools repo"
       ignore_errors: true
@@ -165,7 +166,7 @@
 
               # Add uer to redis socket
               if ! groups gvm |grep -q redis ; then
-                      usermod -aG redis gvm
+                usermod -aG redis gvm
               fi
 
               #Disable transparent hugepages
