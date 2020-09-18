@@ -1,0 +1,3 @@
+@startuml
+fred --> bob
+@enduml
