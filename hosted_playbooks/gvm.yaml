@@ -79,6 +79,7 @@
     ## *** tasks below do the same
 
     - name: "Run greenbone sync script"
+      ignore_errors: true
       args:
         executable: "/bin/bash"
       shell: |
