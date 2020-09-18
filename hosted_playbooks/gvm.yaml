@@ -223,6 +223,7 @@
         - gsad
 
     - name: "gvm admin pass"
+      become: yes
       become_user: "gvm"
       set_fact:
         gvm_admin_pass: "{{ lookup('password', '/var/lib/gvm/.local_gvm_admin_password' ) }}"
