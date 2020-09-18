@@ -246,6 +246,11 @@
         permanent: yes
         state: enabled
 
+    - name: "reload service firewalld"
+      systemd:
+        name: "firewalld"
+        state: reloaded
+
   handlers:
     - name: "Restart gvmd"
       service:
