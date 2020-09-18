@@ -49,8 +49,8 @@
 
     - name: "Extract initial database"
       unarchive:
-      src: "/tmp/gvm.tar.gz"
-      dest: "/"
+        src: "/tmp/gvm.tar.gz"
+        dest: "/"
 
     ## *** Not using gmv-setup from atomicorp as it's not "unattended" friendly
     ## *** tasks below do the same
