@@ -222,11 +222,18 @@
         - gvmd
         - gsad
 
+
+    - name: "Hijack dir to create password file(s)"
+      file:
+        owner: "{{ lookup('env','USER')  }}"
+        group: "gvm"
+        mode: "0775"
+        path: "/etc/ansible/saved_passwd"
+        state: "directory"
+
     - name: "gvm admin pass"
-      become: yes
-      become_user: "gvm"
       set_fact:
-        gvm_admin_pass: "{{ lookup('password', '/var/lib/gvm/.local_gvm_admin_password' ) }}"
+        gvm_admin_pass: "{{ lookup('password', '/etc/ansible/saved_passwd/local_gvm_admin_password' ) }}"
 
     - name: "Create gvm admin user"
       args:
