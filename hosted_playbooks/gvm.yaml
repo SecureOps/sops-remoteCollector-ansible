@@ -39,12 +39,12 @@
         name:
           - "gvm-tools"
 
-    - name: "Sync feeds"
-      ignore_errors: true
-      shell: |
-             aws s3 sync s3://sops-public/gvm/gvm/scap-data/ /var/lib/gvm/scap-data/
-             aws s3 sync s3://sops-public/gvm/gvm/cert-data/ /var/lib/gvm/cert-data/
-             aws s3 sync s3://sops-public/gvm/openvas/plugins/ /var/lib/gvm/plugins/
+    #- name: "Sync feeds"
+    #  ignore_errors: true
+    #  shell: |
+    #         aws s3 sync --quiet --size-only --delete s3://sops-public/gvm/gvm/scap-data/ /var/lib/gvm/scap-data/ 
+    #         aws s3 sync --quiet --size-only --delete s3://sops-public/gvm/gvm/cert-data/ /var/lib/gvm/cert-data/
+    #         aws s3 sync --quiet --size-only --delete s3://sops-public/gvm/openvas/plugins/ /var/lib/gvm/plugins/
 
     - name: "rum gmv-setup"
       shell: |
