@@ -1,3 +1,5 @@
 @startuml
-fred --> bob
+actor User
+participant "Web Server" as ws
+User -> ws : GET /index.html
 @enduml
