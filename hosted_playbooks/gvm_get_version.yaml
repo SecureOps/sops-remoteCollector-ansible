@@ -12,29 +12,34 @@
     - name: "gvm admin pass"
       set_fact:
         gvm_admin_pass: "{{ lookup('password', '/etc/ansible/saved_passwd/local_gvm_admin_password' ) }}"
+
     - name: "Set permissions"
       file:
         mode: "0777"
         path: "/tmp/ansible"
         state: "directory"
-- name: "GVM-SCRIPT Wrapper"
-  hosts: localhost
-  connection: local
-  become: no
-  tasks:
+        
+#- name: "GVM-SCRIPT Wrapper"
+#  hosts: localhost
+#  connection: local
+#  become: no
+#  tasks:
+
     - name: Download the GVM script
       copy:
         src: files/get_version.py
         dest: /tmp/ansible/get_version.py
         owner: ansible_poller
         group: ansible_poller
+
     - name: "Run gvm-script"
       become: yes
       become_user: "gvm"
       args:
         executable: "/bin/bash"
       shell: |
-              /usr/local/bin/gvm-script --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock tmp/get_version.py {{ aws_region_name }} {{ sqs_response_url }} {{ node_name }}
+              /usr/local/bin/gvm-script --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock /tmp/ansible/get_version.py {{ aws_region_name }} {{ sqs_response_url }} {{ node_name }}
+    
     - name: Delete local copy of the GVM script
       file:
         path: /tmp/ansible/get_version.py
