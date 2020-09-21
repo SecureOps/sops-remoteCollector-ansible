@@ -33,5 +33,5 @@
               /usr/local/bin/gvm-script --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock tmp/get_version.py {{ aws_region_name }} {{ sqs_response_url }} {{ node_name }}
     - name: Delete local copy of the GVM script
       file:
-        path: /tmp/get_version.py
+        path: /tmp/ansible/get_version.py
         mode: absent
