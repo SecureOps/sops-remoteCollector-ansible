@@ -19,28 +19,32 @@
         path: "/tmp/ansible"
         state: "directory"
         
-#- name: "GVM-SCRIPT Wrapper"
-#  hosts: localhost
-#  connection: local
-#  become: no
-#  tasks:
 
-    - name: "Download the GVM script"
-      copy:
-        src: "../files/gvm/get_version.py"
-        dest: "/tmp/ansible/get_version.py"
-        owner:
-        mode: "0755"
+    - name: "Run Script BLOCK"    
+      block:
+        - name: "Download the GVM script"
+          copy:
+            src: "../files/gvm/get_version.py"
+            dest: "/tmp/ansible/get_version.py"
+            owner:
+            mode: "0755"
 
-    - name: "Run gvm-script"
-      become: yes
-      become_user: "gvm"
-      args:
-        executable: "/bin/bash"
-      shell: |
-              /usr/local/bin/gvm-script --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock /tmp/ansible/get_version.py {{ aws_region_name }} {{ sqs_response_url }} {{ node_name }}
-    
-    - name: "Delete local copy of the GVM script"
-      file:
-        path: "/tmp/ansible/get_version.py"
-        state: "absent"
+        - name: "Run gvm-script"
+          become: yes
+          become_user: "gvm"
+          register: gvm_script_return
+          args:
+            executable: "/bin/bash"
+          shell: |
+                  /usr/local/bin/gvm-script --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock /tmp/ansible/get_version.py {{ aws_region_name }} {{ sqs_response_url }} {{ node_name }}
+
+        - name: "Show results"
+          debug:
+            msg: 
+              - "{{ gvm_script_return }}"
+
+      always:
+        - name: "Delete local copy of the GVM script"
+          file:
+            path: "/tmp/ansible/get_version.py"
+            state: "absent"
