@@ -29,6 +29,7 @@
       copy:
         src: "../files/gvm/get_version.py"
         dest: "/tmp/ansible/get_version.py"
+        owner:
         mode: "0755"
 
     - name: "Run gvm-script"
@@ -42,4 +43,4 @@
     - name: "Delete local copy of the GVM script"
       file:
         path: "/tmp/ansible/get_version.py"
-        mode: absent
+        state: "absent"
