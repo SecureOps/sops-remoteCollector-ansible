@@ -27,7 +27,7 @@
 
     - name: "Download the GVM script"
       copy:
-        src: "files/gvm/get_version.py"
+        src: "../files/gvm/get_version.py"
         dest: "/tmp/ansible/get_version.py"
         mode: "0755"
 
