@@ -29,7 +29,7 @@
       copy:
         src: "files/gvm/get_version.py"
         dest: "/tmp/ansible/get_version.py"
-        mode: "755"
+        mode: "0755"
 
     - name: "Run gvm-script"
       become: yes
