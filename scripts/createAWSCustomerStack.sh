@@ -5,7 +5,7 @@ set -u
 ## LOAD required customer related vars
 SCRIPT=$( basename ${BASH_SOURCE[0]} )
 SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
-CF_DIR="${SCRIPT_DIR}/../cloudformation/"
+CF_DIR="${SCRIPT_DIR}/../CloudFormation/"
 # SCRIPT_DIR=$( readlink ${SCRIPT_DIR} )
 . ${SCRIPT_DIR}/../vars.sh
 echo "Script Dir: ${SCRIPT_DIR}"
