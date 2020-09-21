@@ -4,7 +4,7 @@
 ###
 
 - name: "GVM-SCRIPT Wrapper admin task"
-  hosts: all
+  hosts: localhost
   connection: local
   become: yes
 
@@ -18,13 +18,13 @@
         path: "/tmp/ansible"
         state: "directory"
 - name: "GVM-SCRIPT Wrapper"
-  hosts: all
+  hosts: localhost
   connection: local
   become: no
   tasks:
     - name: Download the GVM script
       copy:
-        src: files/gvm/get_version.py
+        src: files/get_version.py
         dest: /tmp/ansible/get_version.py
         owner: ansible_poller
         group: ansible_poller
