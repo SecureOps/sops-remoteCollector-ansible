@@ -25,12 +25,11 @@
 #  become: no
 #  tasks:
 
-    - name: Download the GVM script
+    - name: "Download the GVM script"
       copy:
-        src: files/get_version.py
-        dest: /tmp/ansible/get_version.py
-        owner: ansible_poller
-        group: ansible_poller
+        src: "files/gvm/get_version.py"
+        dest: "/tmp/ansible/get_version.py"
+        mode: "755"
 
     - name: "Run gvm-script"
       become: yes
