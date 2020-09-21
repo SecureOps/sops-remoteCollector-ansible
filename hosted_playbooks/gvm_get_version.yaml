@@ -21,7 +21,9 @@
     - name: Download the GVM script
       copy:
         src: files/gvm/get_version.py
-        dest: /tmp/get_version.py
+        dest: /tmp/ansible/get_version.py
+        owner: ansible_poller
+        group: ansible_poller
     - name: "Run gvm-cli"
       become: yes
       become_user: "gvm"
