@@ -1,10 +1,12 @@
 import boto3
 import json
+from gvmtools.helper import pretty_print
+import xml.etree.cElementTree as etree
 
 
 def check_args(args):
     len_args = len(args.script) - 1
-    if len_args is not 2:
+    if len_args is not 3:
         message = """
         This script gets the GVM version and outputs the result to an AWS SQS queue
         Two parameters after the script name is required.
@@ -22,16 +24,15 @@ def main(gmp, args):
   node_name = args.script[3]
 
   version = gmp.get_version()
-  from gvmtools.helper import pretty_print
-  pretty_print(version)
-  sqs = sqs = boto3.client('sqs', region_name=aws_region_name)
+  messageBody = etree.tostring(version).decode('utf-8')
+  sqs = boto3.client('sqs', region_name=aws_region_name)
   try:
       sqs.send_message(
           QueueUrl=sqs_response_url,
-          MessageBody=json.dumps(version),
+          MessageBody = str(messageBody),
           MessageAttributes={
               'origin_message_id': {
-                  'StringValue': message_id,
+                  'StringValue': 'MESSAGE_ID_TBD',
                   'DataType': 'String'
               },
               'responding_node': {
@@ -40,8 +41,12 @@ def main(gmp, args):
               }
           }
       )
+  except TypeError as te:
+      print(f"Send output didn't work: {te}")
+  except NameError as ne:
+      print(f"Send output didn't work: {ne}")
   except Exception as e:
-      print(f"JSON dump of the output didn't work: {e.message}")
+      print(e)
 
 if __name__ == '__gmp__':
   main(gmp, args)
