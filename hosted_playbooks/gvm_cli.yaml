@@ -21,8 +21,7 @@
     - name: Install the SQS Poller's config.json
       template:
         src: "templates/gvm_xml_inputs/{{ scan_command }}.xml.j2"
-        dest:" /home/ansible_poller/{{ scan_command }}.xml"
-
+        dest: "/home/ansible_poller/{{ scan_command }}.xml"
     - name: "Run gvm-cli"
       become: yes
       become_user: "gvm"
