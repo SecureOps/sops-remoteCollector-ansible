@@ -30,17 +30,17 @@ The playbook is received by the remote node using files/sqs_poller.py. This poll
 The format is as follows:
 ```json
 {
-  “command”: “ansible-pull”,
-  “params”: {
-    “playbook”: “hosted_playbooks/gvm-cli.yaml”,
-    “host”: “<ansible target | localhost>”,
-    “playbook_url”: “https://github.com/SecureOps/sops-remoteCollector-ansible.git”,
-    “branch”: “centos8”,
-    “variables: {
-      “scan_command”: “<gvm_command>”,
-      “scan_result_bucket”:”<name of S3 bucket to upload the results to>”,
-      “scan_var1”: “<var1 used inside the template>”,
-      “scan_var2”: “<var2 used inside the template>”
+  "command": "ansible-pull",
+  "params": {
+    "playbook": "hosted_playbooks/gvm-cli.yaml",
+    "host": "<ansible target | localhost>",
+    "playbook_url": "https://github.com/SecureOps/sops-remoteCollector-ansible.git",
+    "branch": "centos8",
+    "variables": {
+      "scan_command": "<gvm_command>",
+      "scan_result_bucket": "<name of S3 bucket to upload the results to>",
+      "scan_var1": "<var1 used inside the template>",
+      "scan_var2": "<var2 used inside the template>"
     }
   }
 }
