@@ -1,4 +1,4 @@
-{
+[{
  "command": "ansible-pull",
  "params": {
     "playbook": "hosted_playbooks/test.yaml",
@@ -9,4 +9,18 @@
   "sqs_response": {
     "sqs_queue_url": "https://sqs.ca-central-1.amazonaws.com/123456789/scannerTest-CommandResponseQueue"
   }
+},
+{
+  “command”: “ansible-pull”,
+  “params”: {
+    “playbook”: “hosted_playbooks/gvm-cli.yaml”,
+    “host”: “localhost”,
+    “playbook_url”: “https://github.com/SecureOps/sops-remoteCollector-ansible.git”,
+    “branch”: “centos8”,
+    “variables: {
+      “scan_command”: “get_scanners”,
+      “scan_result_bucket”:”sopscustomer-scannertest”
+    }
+  }
 }
+]

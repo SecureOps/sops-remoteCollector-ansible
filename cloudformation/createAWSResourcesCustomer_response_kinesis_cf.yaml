@@ -1,0 +1,87 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Create User and Resources for Secureops Customer logs shipping."
+Parameters:
+  CustomerName:
+    Type: String
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    Description: Customer Name, only alphanumeric.
+  CustomerS3BucketName:
+    Type: "String"
+    AllowedPattern: "[a-z][a-z0-9]*"
+    Description: "Customer S3 Bucket Name, only lower case alphanumeric."
+Resources:
+    sopsCustomerKinesisStreamCommand:
+      Type: AWS::Kinesis::Stream
+      DependsOn: sopsCollectorUser
+      Properties:
+        Name: !Sub sopsCustomer-${CustomerName}-command
+        RetentionPeriodHours: 24
+        ShardCount: 1
+        Tags:
+          - Key: CustomerName
+            Value: !Sub ${CustomerName}
+          - Key: StreamType
+            Value: command
+  deliveryRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub sopsCustomerRole-${CustomerName}
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ""
+            Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+            Condition:
+                StringEquals:
+                  "sts:ExternalId": !Ref AWS::AccountId
+    sopsCustomerKinesisDeliverystreamCommandResults:
+      Type: AWS::KinesisFirehose::DeliveryStream
+      DependsOn: deliveryPolicy
+      Properties:
+        DeliveryStreamName: !Sub sopsCustomerDeliveryStream-${CustomerName}-command
+        DeliveryStreamType: KinesisStreamAsSource
+        KinesisStreamSourceConfiguration:
+          KinesisStreamARN: !GetAtt sopsCustomerKinesisStreamCommand.Arn
+          RoleARN: !GetAtt deliveryRole.Arn
+        ExtendedS3DestinationConfiguration:
+          BucketARN: !Sub arn:aws:s3:::${s3bucket}
+          BufferingHints:
+            IntervalInSeconds: 60
+            SizeInMBs: 50
+          CompressionFormat: GZIP
+          Prefix: logs/syslog
+          RoleARN: !GetAtt deliveryRole.Arn
+  deliveryPolicy:
+    Type: "AWS::IAM::Policy"
+    DependsOn: ["sopsCollectorUser", "s3bucket"]
+    Properties:
+      PolicyName: !Sub sopsCustomerDeliveryPolicy-${CustomerName}
+      Roles:
+        - !Ref deliveryRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - "s3:AbortMultipartUpload"
+              - "s3:GetBucketLocation"
+              - "s3:GetObject"
+              - "s3:ListBucket"
+              - "s3:ListBucketMultipartUploads"
+              - "s3:PutObject"
+            Resource:
+              - !Sub arn:aws:s3:::${s3bucket}
+              - !Sub arn:aws:s3:::${s3bucket}*
+          - Effect: Allow
+            Action:
+              - kinesis:DescribeStream
+              - kinesis:GetShardIterator
+              - kinesis:GetRecords
+              - kinesis:DescribeStream
+              - logs:PutLogEvents
+            Resource:
+              - !Sub arn:aws:kinesis:${AWS::Region}:*:stream/sopsCustomer-${CustomerName}-*
+              - !Sub arn:aws:firehose:${AWS::Region}:*:deliverystream/sopsCustomer-${CustomerName}-*
