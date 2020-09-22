@@ -117,6 +117,9 @@ def process_payload(payload, message_id):
                             branch_cli = str(f"-C {params.get('branch')}")
 
                         playbook_url_cli = str(f"-U {params.get('playbook_url')}")
+                        messageid_cli = "none"
+                        if message_id:
+                            messageid_cli = str(f'sqs_messageid={message_id}')
                         variables_cli = ""
                         if 'variables' in params:
                             try:
@@ -125,7 +128,7 @@ def process_payload(payload, message_id):
                             except Exception as e:
                                 output['message'] = str("Failed to parse variables: {}").format(e.message)
 
-                        cmd = str(f'ansible-pull --clean {branch_cli} {playbook_url_cli} {playbook} {host_cli} {variables_cli}')
+                        cmd = str(f'ansible-pull --clean {branch_cli} {playbook_url_cli} {playbook} {host_cli} {variables_cli} {messageid_cli}')
 
         if cmd:
             process = subprocess.run(
