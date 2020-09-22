@@ -1,7 +1,6 @@
 @startuml Hello World
 
 !define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/master/dist
-' !define SPRITESURL https://raw.githubusercontent.com/rabelenda/cicon-plantuml-sprites/v1.0/sprites
 !define SPRITESURL https://raw.githubusercontent.com/rabelenda/gilbarbara-plantuml-sprites/v1.0/sprites
 !include AWSPuml/AWSCommon.puml
 !includeurl AWSPuml/AWSSimplified.puml
@@ -9,15 +8,14 @@
 !include AWSPuml/ApplicationIntegration/SQS.puml
 !include SPRITESURL/ansible.puml
 !include SPRITESURL/github.puml
-!include SPRITESURL/centos.puml
 !include SPRITESURL/python.puml
 
 actor "Operator" as operator
 participant "<$SQS>\nCommand Queue" as cmd_queue
 participant "<$python>\nSQS_Poller" as sqs_poller
 participant "<$ansible>\nAnsible Pull" as ansible_pull
-participant "<$github>\nGithub Repo" as github
-participant "<$SQS>\nCommand Response Queue" as cmd_resp_queue
+participant "<$github>\nAnsible Repo" as github
+participant "<$SQS>\nCommand\nResponse Queue" as cmd_resp_queue
 participant "<$SimpleStorageServiceS3>\nS3 Bucket" as customer_s3
 
 operator -> cmd_queue : Enter SQS message and node_target
