@@ -123,7 +123,7 @@ def process_payload(payload, message_id):
                         variables_cli = ""
                         if 'variables' in params:
                             try:
-                                variables = json.dumps(command['params']['variables'])
+                                variables = json.dumps(params.get('variables'))
                                 variable_cli = str(f"-e '{variables}'" )
                             except Exception as e:
                                 output['message'] = str("Failed to parse variables: {}").format(e.message)
