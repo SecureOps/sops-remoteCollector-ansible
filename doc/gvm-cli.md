@@ -66,10 +66,10 @@ The variables in the JSON above do the following:
         - scan_report_id: ID of the report to get
         - scan_report_format_id: ID of the type to be used for the report
 
-The ansible-pull playbook (hosted_playbooks/gvm_cli.yaml) executes based on the <i>scan_command</i> provided in the variables as follows:
-```bash
-gvm-cli --gmp-username=<username> --gmp-password=<password> socket --socketpath /var/run/gvm/gvmd.sock /tmp/ansible/<scan_command>.xml
-```
+The ansible-pull playbook (hosted_playbooks/gvm_cli.yaml) executes based on the <i>scan_command</i>
+
+![uncached image](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/SecureOps/sops-remoteCollector-ansible/centos8/doc/puml/gvm_cli.puml)
+
 
 ## Ungrouped fetches
 ### Fetching available port lists
