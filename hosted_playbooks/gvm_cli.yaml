@@ -42,7 +42,7 @@
       aws_s3:
         bucket: "{{ scan_result_bucket }}"
         region: "{{ ansible_local.secureops.customer_info.aws_region }}"
-        object: "scan_results/{{ ansible_local.secureops.customer_info.name }}/{{ ansible_local.secureops.customer_info.node_name }}/{{ sqs_message_id }}.xml"
+        object: "scan_results/{{ ansible_local.secureops.customer_info.name }}/{{ ansible_local.secureops.customer_info.node }}/{{ sqs_message_id }}.xml"
         mode: put
         src: "/tmp/ansible/{{ sqs_message_id | default('scan_output') }}.xml"
       when: scan_result_bucket is defined
