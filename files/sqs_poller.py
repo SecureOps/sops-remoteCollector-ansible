@@ -125,7 +125,7 @@ def process_payload(payload, message_id):
                             except Exception as e:
                                 output['message'] = str("Failed to parse variables: {}").format(e.message)
 
-                        cmd = str(f'ansible-pull {branch_cli} {playbook_url_cli} {playbook} {host_cli} {variables_cli}')
+                        cmd = str(f'ansible-pull --clean {branch_cli} {playbook_url_cli} {playbook} {host_cli} {variables_cli}')
 
         if cmd:
             process = subprocess.run(
