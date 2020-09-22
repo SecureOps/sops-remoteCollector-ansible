@@ -30,17 +30,17 @@ The playbook is received by the remote node using files/sqs_poller.py. This poll
 The format is as follows:
 ```json
 {
-  “command”: “ansible-pull”,
-  “params”: {
-    “playbook”: “hosted_playbooks/gvm-cli.yaml”,
-    “host”: “<ansible target | localhost>”,
-    “playbook_url”: “https://github.com/SecureOps/sops-remoteCollector-ansible.git”,
-    “branch”: “centos8”,
-    “variables: {
-      “scan_command”: “<gvm_command>”,
-      “scan_result_bucket”:”<name of S3 bucket to upload the results to>”,
-      “scan_var1”: “<var1 used inside the template>”,
-      “scan_var2”: “<var2 used inside the template>”
+  "command": "ansible-pull",
+  "params": {
+    "playbook": "hosted_playbooks/gvm-cli.yaml",
+    "host": "<ansible target | localhost>",
+    "playbook_url": "https://github.com/SecureOps/sops-remoteCollector-ansible.git",
+    "branch": "centos8",
+    "variables": {
+      "scan_command": "<gvm_command>",
+      "scan_result_bucket": "<name of S3 bucket to upload the results to>",
+      "scan_var1": "<var1 used inside the template>",
+      "scan_var2": "<var2 used inside the template>"
     }
   }
 }
@@ -66,10 +66,10 @@ The variables in the JSON above do the following:
         - scan_report_id: ID of the report to get
         - scan_report_format_id: ID of the type to be used for the report
 
-The ansible-pull playbook (hosted_playbooks/gvm_cli.yaml) executes based on the <i>scan_command</i> provided in the variables as follows:
-```bash
-gvm-cli --gmp-username=<username> --gmp-password=<password> socket --socketpath /var/run/gvm/gvmd.sock /tmp/ansible/<scan_command>.xml
-```
+The ansible-pull playbook (hosted_playbooks/gvm_cli.yaml) executes based on the <i>scan_command</i>
+
+![uncached image](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/SecureOps/sops-remoteCollector-ansible/centos8/doc/puml/gvm_cli.puml)
+
 
 ## Ungrouped fetches
 ### Fetching available port lists
