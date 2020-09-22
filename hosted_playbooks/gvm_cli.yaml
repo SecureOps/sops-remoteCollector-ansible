@@ -14,10 +14,14 @@
         gvm_admin_pass: "{{ lookup('password', '/etc/ansible/saved_passwd/local_gvm_admin_password' ) }}"
 
     - name: "Set permissions"
-      file:        
+      file:
         mode: "0777"
         path: "/tmp/ansible"
         state: "directory"
+    - name: Install the SQS Poller's config.json
+      template:
+        src: templates/gvm_xml_inputs/{{ scan_command }}.xml.j2
+        dest: /home/ansible_poller/{{ scan_command }}.xml
 
     - name: "Run gvm-cli"
       become: yes
@@ -25,11 +29,9 @@
       args:
         executable: "/bin/bash"
       shell: |
-              /usr/local/bin/gvm-cli --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock --xml "<get_version/>"
-
-
-
- 
-
-
-
+              /usr/local/bin/gvm-cli --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock < /tmp/ansible/{{ scan_command }}.xml"
+      register: scan_output
+    - name: "Remove scan command XML"
+      file:
+        path: "/tmp/ansible/{{ scan_command }}.xml"
+        state: "absent"

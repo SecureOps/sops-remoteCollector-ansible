@@ -65,7 +65,7 @@
         path: "/home/ansible_poller/.aws"
         state: directory
         mode: "0755"
-    - name: "Configure AWS CLI credentials"
+    - name: "Configure Boto system-wide AWS CLI credentials"
       copy:
         dest: "/etc/boto.cfg"
         content: |
