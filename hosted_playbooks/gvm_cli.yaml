@@ -9,9 +9,9 @@
   become: yes
 
   tasks:
-    - name: "gvm admin pass"
-      set_fact:
-        gvm_admin_pass: "{{ lookup('password', '/etc/ansible/saved_passwd/local_gvm_admin_password' ) }}"
+    # - name: "gvm admin pass"
+    #   set_fact:
+    #     gvm_admin_pass: "{{ lookup('password', '/etc/ansible/saved_passwd/local_gvm_admin_password' ) }}"
 
     - name: "Set permissions"
       file:
