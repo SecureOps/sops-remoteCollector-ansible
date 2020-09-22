@@ -119,7 +119,7 @@ def process_payload(payload, message_id):
                         playbook_url_cli = str(f"-U {params.get('playbook_url')}")
                         messageid_cli = "none"
                         if message_id:
-                            messageid_cli = str(f'sqs_message_id={message_id}')
+                            messageid_cli = str(f"-e sqs_message_id='{message_id}'")
                         variables_cli = ""
                         if 'variables' in params:
                             try:
