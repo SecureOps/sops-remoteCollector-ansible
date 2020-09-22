@@ -41,6 +41,8 @@
     - name: Upload to S3 bucket
       aws_s3:
         bucket: "{{ scan_result_bucket }}"
+        aws_access_key: "{{ ansible_local.secureops.customer_info.aws_key_id }}"
+        aws_secret_key: "{{ ansible_local.secureops.customer_info.aws_sec_key }}"
         region: "{{ ansible_local.secureops.customer_info.aws_region }}"
         object: "scan_results/{{ ansible_local.secureops.customer_info.name }}/{{ ansible_local.secureops.customer_info.node }}/{{ sqs_message_id }}.xml"
         mode: put
