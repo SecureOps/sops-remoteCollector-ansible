@@ -14,7 +14,6 @@
 
 actor "Operator" as operator
 participant "<$SQS>\nCommand Queue" as cmd_queue
-participant "<$centos>\nRemote Node" as remote_node
 participant "<$python>\nSQS_Poller" as sqs_poller
 participant "<$ansible>\nAnsible Pull" as ansible_pull
 participant "<$github>\nGithub Repo" as github
