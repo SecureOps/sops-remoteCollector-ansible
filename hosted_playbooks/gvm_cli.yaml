@@ -34,3 +34,7 @@
       file:
         path: "/tmp/ansible/{{ scan_command }}.xml"
         state: "absent"
+    - name: Record the output to a file
+      copy:
+        dest: "/tmp/ansible/{{ sqs_message_id | default('scan_output') }}.xml"
+        content: "{{ scan_output }}"
