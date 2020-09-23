@@ -1,7 +1,8 @@
 # Scanning using Greenbone Management Protocol (GMP) Version 20.08
 
-### Table of Contents
-- [Executing API calls using gvm-cli](#executing-api-calls-using-ansible_pull-on-gvm_cli.yaml)
+## Table of Contents
+- [Executing API calls using gvm-cli](#executing-api-calls-using-ansible_pull-on-gvm_cliyaml)
+- [GVM_CLI supported commands](gvm_cli-supported-commands)
 - [Ungrouped fetches](#ungrouped-fetches)
 - [Fetching available port lists](#fetching-available-port-lists)
 - [Fetching available scanners](#fetching-available-scanners)
@@ -17,18 +18,18 @@
  - [Fetching tasks](#fetching-tasks)
  - [Starting a task](#starting-a-task)
  - [Stopping a task](#stopping-a-task)
-- [Reports]
- - [Fetching available report formats]
- - [Fetching CSV report for a task]
+- [Reports](#reports)
+ - [Fetching available report formats](#fetching-available-report-formats)
+ - [Fetching CSV report for a task](#fetching-csv-report-for-a-task)
 
 
-## Executing API calls using <b>ansible_pull</b> on <i>gvm_cli.yaml</i>
+## Executing API calls using <i>ansible_pull</i> on <i>gvm_cli.yaml</i>
 
-*Note, all code related below is available from https://github.com/SecureOps/sops-remoteCollector-ansible
+![uncached image](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/SecureOps/sops-remoteCollector-ansible/centos8/doc/puml/gvm_cli.puml)
 
-The playbook is received by the remote node using files/sqs_poller.py. This poller takes an input via JSON. Note, when SQS sends a message, it assigns a unique message_id which is used to tag the report. This must be obtained from the script used to submit the SQS command or from the AWS SQS Web UI.
+The playbook is received by the remote node using the [SQS Poller](files/sqs_poller.py) service. This poller takes an input via JSON. Note, when SQS sends a message, it assigns a unique message_id which is used to tag the report. This must be obtained from the script used to submit the SQS command or from the AWS SQS Web UI.
 
-The format is as follows:
+The JSON command format is as follows:
 ```json
 {
   "command": "ansible-pull",
@@ -49,29 +50,33 @@ The format is as follows:
 
 The variables in the JSON above do the following:
 - playbook:
-  - This is the playbook executed by ansible-pull. These are located in the Github repository under the <i>hosted_playbooks</i> directory. In this case, this should be a constant for this document and doesn't need to be changed
+  - This is the [playbook](hosted_playbooks/) executed by ansible-pull.
+  - These are located in the Github repository under the <i>hosted_playbooks</i> directory.
+  - In this case, this should be a constant for this document and doesn't need to be changed
 - host:
-  - This is only used when the ansible-pull needs to be executed against an inventory. This should be <i>localhost</i> in regular circumstances.
+  - This variable is only used when the ansible-pull needs to be executed against an inventory.
+  - This variable should be set to <i>localhost</i> in most circumstances.
 - playbook_url:
-  - This is the URL of the repository containing the playbook. If you're using the Github version then this should remained fixed to https://github.com/SecureOps/sops-remoteCollector-ansible.git
+  - This is the URL of the repository containing the playbook.
+  - If using the Github version then this should remained fixed to https://github.com/SecureOps/sops-remoteCollector-ansible.git
 - branch:
-  - The name of the Git branch. GVM is implemented on centos8 unless otherwise specified.
+  - The name of the Git branch.
+  - GVM is implemented on the <i>centos8</i> branch unless otherwise specified.
 - variables:
-  - This dictionary contains variables passed to the hosted_playbooks/gvm_cli.yaml playbook in the format of
-  ```-e {"var1": "val1", "var2": "val2"}```
-  - The following variables are used by the gvm_cli.yaml playbook
-    - scan_command: This is the name of the XML command to be executed. Refer to <b>templates/gvm_xml_inputs</b> for a list of available commands. Further variables can be defined inside these templates, which would also be included in this variable list.
-    - scan_result_bucket: This is the name of an S3 bucket to be used. This should be a bucket created alongside the customer definitions with permissions assigned to the remote_node via AWS key/secret. This is not mandatory, if not provided, the results will be stored on the remote node in /tmp/ansible/<message_id>.xml
-    - scan_<varX>: Any other variable would be defined inside the templates located in <b>templates/gvm_xml_inputs</b>. See the sections described below for what variables are required for each command.
+  - This dictionary contains variables passed to the [hosted_playbooks/gvm_cli.yaml](hosted_playbooks/gvm_cli.yaml) playbook in the format of
+  ```bash
+  -e {"var1": "val1", "var2": "val2"}
+  ```
+  - The following variables are used by the [gvm_cli](hosted_playbooks/gvm_cli.yaml) playbook
+    - scan_command: This is the name of the XML command to be executed. Refer to [templates/gvm_xml_inputs](templates/gvm_xml_inputs/) for a list of available commands. Further variables can be defined inside these templates, which would also be included in this variable list.
+    - scan_result_bucket: (optional) This is the name of an S3 bucket to be used. This should be a bucket created alongside the customer definitions with permissions assigned to the remote_node via AWS key/secret.
+      - This is not mandatory, if not provided, the results will be stored on the remote node in /tmp/ansible/<message_id>.xml
+    - scan_<varX>: Any other variable would be defined inside the templates located in [templates/gvm_xml_inputs](templates/gvm_xml_inputs/). See the sections described below for what variables are required for each command.
       - For example, get_reports.xml requires two variables:
         - scan_report_id: ID of the report to get
         - scan_report_format_id: ID of the type to be used for the report
 
-The ansible-pull playbook (hosted_playbooks/gvm_cli.yaml) executes based on the <i>scan_command</i>
-
-![uncached image](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/SecureOps/sops-remoteCollector-ansible/centos8/doc/puml/gvm_cli.puml)
-
-
+# GVM_CLI supported commands
 ## Ungrouped fetches
 ### Fetching available port lists
 **Scan Command**
