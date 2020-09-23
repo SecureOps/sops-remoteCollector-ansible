@@ -7,25 +7,28 @@
 !include AWSPuml/Storage/SimpleStorageServiceS3.puml
 !include AWSPuml/ApplicationIntegration/SQS.puml
 !include SPRITESURL/ansible.puml
+!include SPRITESURL/linux-tux.puml
 !include SPRITESURL/github.puml
 !include SPRITESURL/python.puml
 
 actor "Operator" as operator
-participant "<$SQS>\nCommand\nQueue" as cmd_queue
-participant "<$python>\nSQS_Poller" as sqs_poller
+participant "<$SQS>\nAWS SQS\nCommand\nQueue" as cmd_queue
+box "<$linux-tux> Remote node"
+participant "<$python>\nSQS_Poller\nService" as sqs_poller
 participant "<$ansible>\nAnsible Pull" as ansible_pull
-participant "<$github>\nAnsible Repo" as github
 participant "GVM" as gvm
-participant "<$SQS>\nCommand\nResponse\nQueue" as cmd_resp_queue
+end box
+participant "<$github>\nAnsible Repo" as github
+participant "<$SQS>\nAWS SQS\nCommand\nResponse\nQueue" as cmd_resp_queue
 participant "<$SimpleStorageServiceS3>\nS3 Bucket" as customer_s3
 
 operator -> cmd_queue : Enter SQS message and node_target
-sqs_poller -> cmd_queue : Fetch JSON filtered on <i>node_target</i> message attribute
+sqs_poller -> cmd_queue : Pull JSON filtered on <i>node_target</i> message attribute
 sqs_poller -> ansible_pull : Execute <b>ansible_pull</b> <i>command</i> with provided <i>param</i> variables
 ansible_pull -> github : Pull <i>playbook_url</i> repository using <i>branch</i>
-ansible_pull -> gvm : "Execute <i>scan_command</i> using <i>scan_*</i> variables
-ansible_pull -> customer_s3 : Upload GVM results using SQS messageID as file name to <i>scan_result_bucket</i>
-sqs_poller -> cmd_resp_queue : Upload stdout, stderr, shell to SQS queue
-operator -> cmd_resp_queue : Get results
+ansible_pull -> gvm : Execute <i>scan_command</i> using <i>scan_*</i> variables
+ansible_pull -> customer_s3 : Upload GVM XML results using SQS messageID as file name to <i>scan_result_bucket</i>
+sqs_poller -> cmd_resp_queue : Push stdout, stderr, shell to SQS queue
+operator -> cmd_resp_queue : Get <b>ansible_pull</b> output
 operator -> customer_s3 : Download <b>sqs_message_id</b>.xml for GVM results
 @enduml
