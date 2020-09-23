@@ -46,6 +46,9 @@ The JSON structure to issue a command to the remote node is:
       "scan_var1": "<var1 used inside the template>",
       "scan_var2": "<var2 used inside the template>"
     }
+  },
+  "sqs_response": {
+    "sqs_queue_url": "https://sqs.ca-central-1.amazonaws.com/123456789/scannerTest-CommandResponseQueue"
   }
 }
 ```
