@@ -1,24 +1,25 @@
 # Scanning using Greenbone Management Protocol (GMP) Version 20.08
 
 ### Table of Contents
-[fred](/doc/gvm_cli.md#executing-api-calls-using-gvm-cli)
-- Ungrouped fetches
-- Fetching available port lists
-- Fetching available scanners
-- Fetching available scan configurations
-- Credentials
- - Creating credentials
- - Fetching available credentials
-- Targets
- - Creating a target
- - Fetching available targets
-- Tasks
- - Creating a task
- - Fetching tasks
- - Starting and stopping tasks
-- Reports
- - Fetching available report formats
- - Fetching CSV report for a task
+- [Executing API calls using gvm-cli](/doc/gvm_cli.md#executing-api-calls-using-gvm-cli)
+- [Ungrouped fetches](#ungrouped-fetches)
+- [Fetching available port lists](#fetching-available-port-lists)
+- [Fetching available scanners](#fetching-available-scanners)
+- [Fetching available scan configurations](#fetching-available-scan-configurations)
+- [Credentials](#credentials)
+ - [Creating credentials](#creating-credentials)
+ - [Fetching available credentials](#fetching-available-credentials)
+- [Targets](#targets)
+ - [Creating a target](#creating-a-target)
+ - [Fetching available targets](#fetching-available-targets)
+- [Tasks](#tasks)
+ - [Creating a task](#creating-a-task)
+ - [Fetching tasks](#fetching-tasks)
+ - [Starting a task](#starting-a-task)
+ - [Stopping a task](#stopping-a-task)
+- [Reports]
+ - [Fetching available report formats]
+ - [Fetching CSV report for a task]
 
 
 ## Executing API calls using gvm-cli
