@@ -100,11 +100,18 @@ Resources:
               - s3:GetBucketLocation
               - s3:GetObject
               - s3:PutObject
-              - s3:ListBucket
-              - s3:ListBucketMultipartUploads
+              - s3:PutObjectAcl
             Resource:
               - !GetAtt s3bucket.Arn
               - !Sub ${s3bucket.Arn}*
+          - Effect: Allow
+            Action:
+              - s3:GetBucketLocation
+              - s3:ListBucket
+              - s3:ListBucketMultipartUploads
+              - s3:AbortMultipartUpload
+            Resource:
+              - !GetAtt s3bucket.Arn
           - Effect: Allow
             Action:
               - cloudwatch:PutMetricData
