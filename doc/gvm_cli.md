@@ -27,7 +27,7 @@
 
 ![uncached image](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/SecureOps/sops-remoteCollector-ansible/centos8/doc/puml/gvm_cli.puml)
 
-The entire system is based on the [SQS Poller](files/sqs_poller.py) service on the <b>remote node</b> which fetches a JSON structure to execute a <i>command</i>. In this case, the command is <b><i>ansible_pull</i></b>.
+The entire system is based on the [SQS Poller](/files/sqs_poller.py) service on the <b>remote node</b> which fetches a JSON structure to execute a <i>command</i>. In this case, the command is <b><i>ansible_pull</i></b>.
 
 Note, when SQS sends a message, it assigns a unique <i>sqs_message_id</i> which is used to tag the report. This must be obtained from the script used to submit the SQS command or from the AWS SQS Web UI.
 
@@ -52,7 +52,7 @@ The JSON structure to issue a command to the remote node is:
 
 The variables in the JSON above do the following:
 - playbook:
-  - This is the [playbook](hosted_playbooks/) executed by ansible-pull.
+  - This is the [playbook](/hosted_playbooks/) executed by ansible-pull.
   - These are located in the Github repository under the <i>hosted_playbooks</i> directory.
   - In this case, this should be a constant for this document and doesn't need to be changed
 - host:
@@ -65,15 +65,15 @@ The variables in the JSON above do the following:
   - The name of the Git branch.
   - GVM is implemented on the <i>centos8</i> branch unless otherwise specified.
 - variables:
-  - This dictionary contains variables passed to the [hosted_playbooks/gvm_cli.yaml](hosted_playbooks/gvm_cli.yaml) playbook in the format of
+  - This dictionary contains variables passed to the [/hosted_playbooks/gvm_cli.yaml](hosted_playbooks/gvm_cli.yaml) playbook in the format of
   ```bash
   -e {"var1": "val1", "var2": "val2"}
   ```
-  - The following variables are used by the [gvm_cli](hosted_playbooks/gvm_cli.yaml) playbook
-    - scan_command: This is the name of the XML command to be executed. Refer to [templates/gvm_xml_inputs](templates/gvm_xml_inputs/) for a list of available commands. Further variables can be defined inside these templates, which would also be included in this variable list.
+  - The following variables are used by the [gvm_cli](/hosted_playbooks/gvm_cli.yaml) playbook
+    - scan_command: This is the name of the XML command to be executed. Refer to [/templates/gvm_xml_inputs](templates/gvm_xml_inputs/) for a list of available commands. Further variables can be defined inside these templates, which would also be included in this variable list.
     - scan_result_bucket: (optional) This is the name of an S3 bucket to be used. This should be a bucket created alongside the customer definitions with permissions assigned to the remote_node via AWS key/secret.
       - This is not mandatory, if not provided, the results will be stored on the remote node in /tmp/ansible/<message_id>.xml
-    - scan_<varX>: Any other variable would be defined inside the templates located in [templates/gvm_xml_inputs](templates/gvm_xml_inputs/). See the sections described below for what variables are required for each command.
+    - scan_<varX>: Any other variable would be defined inside the templates located in [/templates/gvm_xml_inputs](templates/gvm_xml_inputs/). See the sections described below for what variables are required for each command.
       - For example, get_reports.xml requires two variables:
         - scan_report_id: ID of the report to get
         - scan_report_format_id: ID of the type to be used for the report
