@@ -219,16 +219,26 @@
       ignore_errors: true
 
     - name: "stunnel client config"
-      copy:
+      file:
         owner: "root"
         group: "root"
         mode: "0660"
         path: "/etc/stunnel/stunnel.conf"
         state: "file"
+    
+    - name: "stunnel psk file"
+      copy:
+        owner: "root"
+        group: "root"
+        mode: "0600"
+        path: "/etc/stunnel/psk.txt"
+        content: |
+                  sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}:{{ lookup('password', '/etc/stunnel/saved_passwd/local_gvm_admin_password length=128' ) }}
+
+
     ##
     ##
     ######
-
 
     - cron:
         name: "Set ansible-pull to run regularly"
@@ -239,7 +249,6 @@
         name: "Phone Home script"
         minute: "*/30"
         job: "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}/{{ ansible_local.secureops.customer_info.node | lower }}/data/phone_home /root/phone_home 2>/dev/null && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
-
 
   handlers:
     - name: "Restart sqs_poller service"
