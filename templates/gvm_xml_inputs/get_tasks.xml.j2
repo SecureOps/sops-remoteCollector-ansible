@@ -1,6 +1,6 @@
 <get_tasks
   ignore_pagination="true"
-  {% if scan_task_id %}
+  {% if scan_task_id is defined %}
   task_id="{{ scan_task_id }}"
   {% endif %}
 />
