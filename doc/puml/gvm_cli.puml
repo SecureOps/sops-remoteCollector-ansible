@@ -13,7 +13,7 @@
 
 actor "Operator" as operator
 participant "<$SQS>\nAWS SQS\nCommand\nQueue" as cmd_queue
-box "<$linux-tux> Remote node" BackgroundColor #White
+box <$linux-tux> "Remote node" BackgroundColor #White
 participant "<$python>\nSQS_Poller\nService" as sqs_poller
 participant "<$ansible>\nAnsible Pull" as ansible_pull
 participant "GVM" as gvm
