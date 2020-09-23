@@ -30,6 +30,7 @@
       shell: |
               /usr/local/bin/gvm-cli --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock /tmp/ansible/{{ scan_command }}.xml
       register: scan_output
+      ignore_errors: yes
     - name: "Remove scan command XML"
       file:
         path: "/tmp/ansible/{{ scan_command }}.xml"
