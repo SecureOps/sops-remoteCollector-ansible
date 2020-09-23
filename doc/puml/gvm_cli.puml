@@ -22,12 +22,13 @@ participant "<$github>\nAnsible Repo" as github
 participant "<$SQS>\nAWS SQS\nCommand\nResponse\nQueue" as cmd_resp_queue
 participant "<$SimpleStorageServiceS3>\nS3 Bucket" as customer_s3
 
-operator -> cmd_queue : Enter SQS message and node_target
+operator -> cmd_queue : Enter SQS message body and <i>node_target</i> message attribute
+cmd_queue --> operator : <i>sqs_message_id</i>
 sqs_poller -> cmd_queue : Pull JSON filtered on <i>node_target</i> message attribute
 sqs_poller -> ansible_pull : Execute <b>ansible_pull</b> <i>command</i> with provided <i>param</i> variables
 ansible_pull -> github : Pull <i>playbook_url</i> repository using <i>branch</i>
 ansible_pull -> gvm : Execute <i>scan_command</i> using <i>scan_*</i> variables
-ansible_pull -> customer_s3 : Upload GVM XML results using SQS messageID as file name to <i>scan_result_bucket</i>
+ansible_pull -> customer_s3 : Upload GVM XML results using <i>sqs_message_id</i> as file name to <i>scan_result_bucket</i>
 sqs_poller -> cmd_resp_queue : Push stdout, stderr, shell to SQS queue
 operator -> cmd_resp_queue : Get <b>ansible_pull</b> output
 operator -> customer_s3 : Download <b>sqs_message_id</b>.xml for GVM results

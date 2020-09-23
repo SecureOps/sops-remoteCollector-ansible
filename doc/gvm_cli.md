@@ -27,9 +27,11 @@
 
 ![uncached image](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/SecureOps/sops-remoteCollector-ansible/centos8/doc/puml/gvm_cli.puml)
 
-The playbook is received by the remote node using the [SQS Poller](files/sqs_poller.py) service. This poller takes an input via JSON. Note, when SQS sends a message, it assigns a unique message_id which is used to tag the report. This must be obtained from the script used to submit the SQS command or from the AWS SQS Web UI.
+The entire system is based on the [SQS Poller](files/sqs_poller.py) service on the <b>remote node</b> which fetches a JSON structure to execute a <i>command</i>. In this case, the command is <b><i>ansible_pull</i></b>.
 
-The JSON command format is as follows:
+Note, when SQS sends a message, it assigns a unique <i>sqs_message_id</i> which is used to tag the report. This must be obtained from the script used to submit the SQS command or from the AWS SQS Web UI.
+
+The JSON structure to issue a command to the remote node is:
 ```json
 {
   "command": "ansible-pull",
