@@ -28,6 +28,7 @@
       become: yes
       become_user: "gvm"
       register: scan_output
+      no_log: true
       ignore_errors: yes
       args:
         executable: "/bin/bash"
