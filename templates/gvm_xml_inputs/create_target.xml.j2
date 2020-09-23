@@ -1,16 +1,16 @@
 <create_target>
    <name>{{ scan_target_label }}</name>
    <hosts>{{ scan_target_host_csv }}</hosts>
-   {% if scan_port_list_id %}
+   {% if defined scan_port_list_id %}
    <port_list id="{{ scan_port_list_id }}"/>
    {% endif %}
-   {% if scan_ssh_credential_id %}
+   {% if defined scan_ssh_credential_id %}
    <ssh_credential id="{{ scan_ssh_credential_id }}"/>
    {% endif %}
-   {% if scan_smb_credential_id %}
+   {% if defined scan_smb_credential_id %}
    <smb_credential id="{{ scan_smb_credential_id }}"/>
    {% endif %}
-   {% if scan_esxi_credential_id %}
+   {% if defined scan_esxi_credential_id %}
    <esxi_credential id="{{ scan_esxi_credential_id }}"/>
    {% endif %}
 </create_target>
