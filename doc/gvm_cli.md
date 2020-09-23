@@ -1,7 +1,7 @@
 # Scanning using Greenbone Management Protocol (GMP) Version 20.08
 
 ### Table of Contents
-- [Executing API calls using gvm-cli](#executing-api-calls-using-gvm-cli)
+- [Executing API calls using gvm-cli](#executing-api-calls-using-ansible_pull-on-gvm_cli.yaml)
 - [Ungrouped fetches](#ungrouped-fetches)
 - [Fetching available port lists](#fetching-available-port-lists)
 - [Fetching available scanners](#fetching-available-scanners)
@@ -22,7 +22,7 @@
  - [Fetching CSV report for a task]
 
 
-## Executing API calls using gvm-cli
+## Executing API calls using <b>ansible_pull</b> on <i>gvm_cli.yaml</i>
 
 *Note, all code related below is available from https://github.com/SecureOps/sops-remoteCollector-ansible
 
