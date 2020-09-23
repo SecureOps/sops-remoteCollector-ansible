@@ -35,26 +35,30 @@
       shell: |
               /usr/local/bin/gvm-cli --timeout 300 --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock /tmp/ansible/{{ sqs_message_id | default('gvm-cli') }}.xml
 
-    - name: Record the output to a file
+    - name: "Record the stdout to a file"
       copy:
         dest: "/tmp/ansible/{{ sqs_message_id | default('scan_output') }}-output.xml"
         content: "{{ scan_output.stdout }}"
 
-    - name: Record the output to a file
+    - name: "Record the stderr to a file"
       copy:
         dest: "/tmp/ansible/{{ sqs_message_id | default('scan_output') }}-error.txt"
         content: "{{ scan_output.stderr }}"
 
-    - name: Upload to S3 bucket
+    - name: "Upload to S3 bucket"
       aws_s3:
         bucket: "{{ scan_result_bucket }}"
         aws_access_key: "{{ ansible_local.secureops.customer_info.aws_key_id }}"
         aws_secret_key: "{{ ansible_local.secureops.customer_info.aws_sec_key }}"
         region: "{{ ansible_local.secureops.customer_info.aws_region }}"
-        object: "scan_results/{{ ansible_local.secureops.customer_info.name }}/{{ ansible_local.secureops.customer_info.node }}/{{ sqs_message_id }}.xml"
+        object: "scan_results/{{ ansible_local.secureops.customer_info.name }}/{{ ansible_local.secureops.customer_info.node }}/{{ item }}"
         mode: put
-        src: "/tmp/ansible/{{ sqs_message_id | default('scan_output') }}*"
+        src: "/tmp/ansible/{{ item }}"
       when: scan_result_bucket is defined
+      loop:
+        - "{{ sqs_message_id | default('scan_output') }}-output.xml"
+        - "{{ sqs_message_id | default('scan_output') }}-error.txt"
+
 
     #- name: "Remove scan temp files"
     #  file:
