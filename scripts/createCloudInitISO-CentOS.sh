@@ -51,7 +51,6 @@ users:
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
     groups: users
     shell: /bin/bash
-    ssh_pwauth: False
     ssh-authorized-keys:
       - ${INITIAL_USER_SSH_KEY}
   - name: ansible_poller
