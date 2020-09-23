@@ -52,6 +52,7 @@ Ansible Playbooks to configure a Remote Agent
 11) Start the VM and auto configration should kick in.
 
 12) The following command will run during first boot: 
-
+  ```
   $ ansible-pull -c "<GIT_BRANCH>" -U https://github.com/SecureOps/sops-remoteCollector-ansible.git collector-setup.yaml
+  ```
 
