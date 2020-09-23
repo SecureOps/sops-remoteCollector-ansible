@@ -190,7 +190,7 @@
             force: no
           register: _ssh_key
 
-        - name: "Upload to S3 bucket"
+        - name: "Upload ssh pub key to S3 bucket"
           aws_s3:
             mode: "put"
             aws_access_key: "{{ ansible_local.secureops.customer_info.aws_key_id }}"
@@ -225,7 +225,7 @@
         mode: "0660"
         path: "/etc/stunnel/stunnel.conf"
         state: "file"
-    
+
     - name: "stunnel psk file"
       copy:
         owner: "root"
@@ -235,7 +235,15 @@
         content: |
                   sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}:{{ lookup('password', '/etc/stunnel/saved_passwd/local_gvm_admin_password length=128' ) }}
 
-
+    - name: "Upload psk to S3 bucket"
+      aws_s3:
+        mode: "put"
+        aws_access_key: "{{ ansible_local.secureops.customer_info.aws_key_id }}"
+        aws_secret_key: "{{ ansible_local.secureops.customer_info.aws_sec_key }}"
+        region: "{{ ansible_local.secureops.customer_info.aws_region }}"
+        bucket: "sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}"
+        object: "nodes/{{ ansible_local.secureops.customer_info.node | lower }}/psk.txt"
+        src: "/etc/stunnel/psk.txt"
     ##
     ##
     ######
