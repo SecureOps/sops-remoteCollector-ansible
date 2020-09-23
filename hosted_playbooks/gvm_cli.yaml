@@ -18,27 +18,32 @@
         mode: "0777"
         path: "/tmp/ansible"
         state: "directory"
+
     - name: Populate the input XML file from a template
       template:
         src: "../templates/gvm_xml_inputs/{{ scan_command }}.xml.j2"
         dest: "/tmp/ansible/{{ scan_command }}.xml"
+
     - name: "Run gvm-cli"
       become: yes
       become_user: "gvm"
+      register: scan_output
+      ignore_errors: yes
       args:
         executable: "/bin/bash"
       shell: |
               /usr/local/bin/gvm-cli --timeout 300 --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock /tmp/ansible/{{ scan_command }}.xml
-      register: scan_output
-      ignore_errors: yes
+
     - name: "Remove scan command XML"
       file:
         path: "/tmp/ansible/{{ scan_command }}.xml"
         state: "absent"
+
     - name: Record the output to a file
       copy:
         dest: "/tmp/ansible/{{ sqs_message_id | default('scan_output') }}.xml"
         content: "{{ scan_output.stdout }}"
+
     - name: Upload to S3 bucket
       aws_s3:
         bucket: "{{ scan_result_bucket }}"
@@ -49,7 +54,8 @@
         mode: put
         src: "/tmp/ansible/{{ sqs_message_id | default('scan_output') }}.xml"
       when: scan_result_bucket is defined
-    - name: "Remove scan result when an S3 bucket is defined"
-      file:
-        path: "/tmp/ansible/{{ sqs_message_id | default('scan_output') }}.xml"
-        state: "absent"
+
+    #- name: "Remove scan result when an S3 bucket is defined"
+    #  file:
+    #    path: "/tmp/ansible/{{ sqs_message_id | default('scan_output') }}.xml"
+    #    state: "absent"
