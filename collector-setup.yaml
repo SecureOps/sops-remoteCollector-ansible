@@ -14,7 +14,12 @@
       when: ( ansible_distribution not in ['CentOS'] )
 
     - yum:
-        name:  ["zip","python3-systemd","wget"]
+        name:  
+          - "zip"
+          - "python3-systemd"
+          - "wget"
+          - "stunnel"
+          - "autossh"
         state: "latest"
         update_cache: "yes"
 
@@ -46,6 +51,9 @@
     ##
     ######
 
+    ######
+    ## AWS CLI Configuration(s)
+    ##
     - name: "Set the AWS region fact"
       set_fact:
         AWS_REGION: "{{ ansible_local.secureops.customer_info.aws_region }}"
@@ -105,6 +113,9 @@
         profile: "{{ AWS_PROFILE | default('default') }}"
         stack_name: "{{ tmp_node_stack_name }}"
       register: node_template
+    ##
+    ##
+    ######
 
     ######
     ## Install and config SQL POLLER Service
@@ -157,6 +168,67 @@
     ##
     ##
     ######
+
+    ######
+    ## Generate SSH Key pair for ansible_poller
+    ##
+    - name: "block"
+      become: yes
+      become_user: "ansible_poller"
+      block:
+        - name: "aa"
+          file:
+            path: "~/.ssh/"
+            mode: "0700"
+            state: "directory"
+
+        - name: "generate SSH key for ansible_poller"
+          openssh_keypair:
+            path: "~/.ssh/id_ecdsa"
+            type: "ecdsa"
+            state: "present"
+            force: no
+          register: _ssh_key
+
+        - name: "Upload to S3 bucket"
+          aws_s3:
+            mode: "put"
+            aws_access_key: "{{ ansible_local.secureops.customer_info.aws_key_id }}"
+            aws_secret_key: "{{ ansible_local.secureops.customer_info.aws_sec_key }}"
+            region: "{{ ansible_local.secureops.customer_info.aws_region }}"
+            bucket: "sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}"
+            object: "nodes/{{ ansible_local.secureops.customer_info.node | lower }}/id_ecdsa.pub"
+            src: "{{ _ssh_key.filename  }}.pub"
+    ##
+    ##
+    ######
+
+    ######
+    ## sTunnel configuration
+    ##
+    - name: "Get stunnel config from S3"
+      aws_s3:
+        mode: "get"
+        overwrite: "different"
+        aws_access_key: "{{ ansible_local.secureops.customer_info.aws_key_id }}"
+        aws_secret_key: "{{ ansible_local.secureops.customer_info.aws_sec_key }}"
+        region: "{{ ansible_local.secureops.customer_info.aws_region }}"
+        bucket: "sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}"
+        object: "stunnel_client.conf"
+        dest: "/etc/stunnel/stunnel.conf"
+      ignore_errors: true
+
+    - name: "stunnel client config"
+      copy:
+        owner: "root"
+        group: "root"
+        mode: "0660"
+        path: "/etc/stunnel/stunnel.conf"
+        state: "file"
+    ##
+    ##
+    ######
+
 
     - cron:
         name: "Set ansible-pull to run regularly"
