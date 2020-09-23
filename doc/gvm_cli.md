@@ -1,7 +1,7 @@
 # Scanning using Greenbone Management Protocol (GMP) Version 20.08
 
 ### Table of Contents
-(fred)[/doc/gvm_cli.md#executing-api-calls-using-gvm-cli]
+[fred](/doc/gvm_cli.md#executing-api-calls-using-gvm-cli)
 - Ungrouped fetches
 - Fetching available port lists
 - Fetching available scanners
