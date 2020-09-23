@@ -15,7 +15,7 @@ To do that, follow these steps:
 3. Click in `Send and receive messages`.
 4. Add the following attribute in "Message attributes" (replace the value with a proper node name):
     ```
-    name: target_node
+    name: node_target
     type: String
     value: <_Node Name_>
     ```
