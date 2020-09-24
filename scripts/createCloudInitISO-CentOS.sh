@@ -146,7 +146,22 @@ EOF
 fi
 set -u
 
-
 # generate the seed images
 mkisofs -output ${CUSTOMER_NAME}-ci-img.iso -volid cidata -joliet -rock ${TMPDIR}/
 ## alternative method ##-> cloud-localds -v --network-config=${TMPDIR}/network-config ${CUSTOMER_NAME}-ci-img.iso ${TMPDIR}/user-data ${TMPDIR}/meta-data
+
+
+# Create stunnel client config file
+cat <<EOF > "${TMPDIR}/${TARGET_HOSTNAME}-stunnel.conf"
+pid = /var/run/stunnel.pid
+[ssh-psk-client]
+client=yes
+accept = 0.0.0.0:2222
+connect = ${STUNNEL_GW}
+ciphers = PSK
+PSKsecrets = /etc/stunnel/psk.txt
+EOF
+
+aws s3 cp "${TMPDIR}/${TARGET_HOSTNAME}-stunnel.conf" "s3://sopscustomer-${CUSTOMER_LOWER}/nodes/${REMOTE_NODE_NAME}/stunnel_client.conf"
+rm -f "${TMPDIR}/${TARGET_HOSTNAME}-stunnel.conf"
+

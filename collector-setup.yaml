@@ -214,7 +214,7 @@
         aws_secret_key: "{{ ansible_local.secureops.customer_info.aws_sec_key }}"
         region: "{{ ansible_local.secureops.customer_info.aws_region }}"
         bucket: "sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}"
-        object: "stunnel_client.conf"
+        object: "/nodes/{{ ansible_local.secureops.customer_info.nodei }}/stunnel_client.conf"
         dest: "/etc/stunnel/stunnel.conf"
       ignore_errors: true
 
@@ -225,8 +225,12 @@
         mode: "0660"
         path: "/etc/stunnel/stunnel.conf"
         state: "file"
+      notify:
+        - "Restart stunnel service"
 
     - name: "stunnel psk file"
+      notify:
+        - "Restart stunnel service"
       copy:
         owner: "root"
         group: "root"
@@ -244,6 +248,12 @@
         bucket: "sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}"
         object: "nodes/{{ ansible_local.secureops.customer_info.node | lower }}/psk.txt"
         src: "/etc/stunnel/psk.txt"
+
+    - name: "Start/Enable stunnel service"
+      service:
+        name: "stunnel"
+        state: "started"
+        enabled: true
     ##
     ##
     ######
@@ -262,4 +272,9 @@
     - name: "Restart sqs_poller service"
       service:
         name: "sqs_poller.service"
+        state: "restarted"
+
+    - name: "Restart stunnel service"
+      service:
+        name: "stunnel"
         state: "restarted"
