@@ -144,7 +144,7 @@
     - name: "Copy ansible poller service script"
       copy:
         src: "files/sqs_poller.service"
-        dest: "/usr/lib/systemd/system/sqs_poller.service"
+        dest: "/etc/systemd/system/sqs_poller.service"
         owner: "root"
         group: "root"
       notify:
@@ -258,15 +258,60 @@
     ##
     ######
 
+    ######
+    ## autossh configuration
+    ##
+    - name: "Get remote loopback IP address to use"
+      aws_s3:
+        mode: "get"
+        overwrite: "different"
+        aws_access_key: "{{ ansible_local.secureops.customer_info.aws_key_id }}"
+        aws_secret_key: "{{ ansible_local.secureops.customer_info.aws_sec_key }}"
+        region: "{{ ansible_local.secureops.customer_info.aws_region }}"
+        bucket: "sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}"
+        object: "/nodes/{{ ansible_local.secureops.customer_info.node }}/remote_loopback_ip.txt"
+        dest: "/etc/autossh/remote_loopback_ip.txt"
+      ignore_errors: true
+    
+    - name: "Get stats of /etc/autossh/remote_loopback_ip.txt"
+      stat:
+        path: "/etc/autossh/remote_loopback_ip.txt"
+      register: rlst
+    
+    - name: "Autossh config"
+      when: ( rlst.stat.exists )
+      block:
+        - set_fact:
+          _remote_loopback_ip: "{{ lookup('file', '/etc/autossh/remote_loopback_ip.txt') }}"
+
+        - name: "autossh systemd service unit"
+          template:
+            src: "templates/autossh.service.j2"
+            dest: "/etc/systemd/system/autossh.service"
+            owner: "root"
+            group: "root"
+          notify:
+
+        - name: "Install autossh service"
+          systemd:
+            name: "autossh.service"
+            enabled: yes
+            daemon_reload: yes
+            state: "started"
+    ##
+    ##
+    ######
+
     - cron:
         name: "Set ansible-pull to run regularly"
         minute: "*/90"
         job: "ansible-pull -C {{ ansible_local.secureops.devops.ansible_pull_branch }} -U {{ ansible_local.secureops.devops.ansible_pull_url}} {{ ansible_local.secureops.devops.ansible_pull_playbook }} > /var/log/last-ansible-pull.log 2>&1"
 
-    - cron:
-        name: "Phone Home script"
-        minute: "*/30"
-        job: "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}/{{ ansible_local.secureops.customer_info.node | lower }}/data/phone_home /root/phone_home 2>/dev/null && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
+    # Do we still need this ? (S.M. 2020-09-24)
+    #- cron:
+    #    name: "Phone Home script"
+    #    minute: "*/30"
+    #    job: "aws s3 cp s3://sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}/{{ ansible_local.secureops.customer_info.node | lower }}/data/phone_home /root/phone_home 2>/dev/null && cat /root/phone_home | gpg --decrypt --batch 2>/dev/null > /root/phone_home.sh  && bash /root/phone_home.sh  > /var/log/last-phone-call.log 2>&1"
 
   handlers:
     - name: "Restart sqs_poller service"
@@ -277,4 +322,9 @@
     - name: "Restart stunnel service"
       service:
         name: "stunnel"
+        state: "restarted"
+
+    - name: "Restart autossh service"
+      service:
+        name: "autossh"
         state: "restarted"
