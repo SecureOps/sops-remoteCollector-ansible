@@ -152,8 +152,7 @@ create_target
 get_targets
 
 **Variables**
-
-None
+- scan_target_id : (Optional) ID of the target to return.
 
 ## Tasks
 ### Creating a task
