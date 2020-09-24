@@ -1,1 +1,5 @@
-<get_targets/>
+<get_targets
+  {% if scan_target_id is defined %}
+  target_id="{{ scan_target_id }}"
+  {% endif %}
+/>
