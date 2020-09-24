@@ -282,7 +282,7 @@
       when: ( rlst.stat.exists )
       block:
         - set_fact:
-          _remote_loopback_ip: "{{ lookup('file', '/etc/autossh/remote_loopback_ip.txt') }}"
+            _remote_loopback_ip: "{{ lookup('file', '/etc/autossh/remote_loopback_ip.txt') }}"
 
         - name: "autossh systemd service unit"
           template:
