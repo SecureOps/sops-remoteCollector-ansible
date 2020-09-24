@@ -182,8 +182,9 @@ aws s3 cp "${TMPDIR}/${TARGET_HOSTNAME}-stunnel.conf" "s3://sopscustomer-${CUSTO
 rm -f "${TMPDIR}/${TARGET_HOSTNAME}-stunnel.conf"
 
 # Create txt file with REMOTE LOOPBACK IP and upload to S3
-cat <<EOF > "${TMPDIR}/${TARGET_HOSTNAME}-remote_loopback_ip.conf"
+cat <<EOF > "${TMPDIR}/${TARGET_HOSTNAME}-remote_loopback_ip.txt"
+${REMOTE_LOOPBACK_IP}
 EOF
-aws s3 cp "${TMPDIR}/${TARGET_HOSTNAME}-remote_loopback_ip.conf" "s3://sopscustomer-${CUSTOMER_LOWER}/nodes/${REMOTE_NODE_NAME}/remote_loopback_ip.txt"
-rm -f "${TMPDIR}/${TARGET_HOSTNAME}-remote_loopback_ip.conf"
+aws s3 cp "${TMPDIR}/${TARGET_HOSTNAME}-remote_loopback_ip.txt" "s3://sopscustomer-${CUSTOMER_LOWER}/nodes/${REMOTE_NODE_NAME}/remote_loopback_ip.txt"
+rm -f "${TMPDIR}/${TARGET_HOSTNAME}-remote_loopback_ip.txt"
 

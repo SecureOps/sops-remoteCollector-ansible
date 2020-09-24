@@ -273,7 +273,7 @@
         dest: "/etc/autossh/remote_loopback_ip.txt"
       ignore_errors: true
     
-    - name: "Get stats of /etc/autossh/remote_loopback_ip.txt"
+    - name: "Get stat of /etc/autossh/remote_loopback_ip.txt file"
       stat:
         path: "/etc/autossh/remote_loopback_ip.txt"
       register: rlst
