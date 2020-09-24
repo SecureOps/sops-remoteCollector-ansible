@@ -214,7 +214,7 @@
         aws_secret_key: "{{ ansible_local.secureops.customer_info.aws_sec_key }}"
         region: "{{ ansible_local.secureops.customer_info.aws_region }}"
         bucket: "sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}"
-        object: "/nodes/{{ ansible_local.secureops.customer_info.nodei }}/stunnel_client.conf"
+        object: "/nodes/{{ ansible_local.secureops.customer_info.node }}/stunnel_client.conf"
         dest: "/etc/stunnel/stunnel.conf"
       ignore_errors: true
 
