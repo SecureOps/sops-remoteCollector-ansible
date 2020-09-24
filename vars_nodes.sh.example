@@ -1,0 +1,17 @@
+##
+## THIS IS AN EXAMPLE FILE.
+## THE REAL FILE MUST BE NAMED like: "vars_<CUSTOMER_NAME>_nodes_<REMOTE_NODE_NAME>.sh" 
+##   Ex: vars_testCustomer_nodes_test01.sh
+##       vars_secureops_nodes_collector03.sh
+
+REMOTE_NODE_NAME="node01"
+
+## Agent VM Network information (Comment for DHCP)
+##  * MAC_ADDR is always required
+MAC_ADDR="x.x.x.x"
+IP_CIDR="x.x.x.x/y"
+GATEWAY="x.x.x.x"
+NAMESERVER[0]="a.a.a.a"
+NAMESERVER[1]="a.a.a.a"
+
+REMOTE_LOOPBACK_IP=127.x.x.x

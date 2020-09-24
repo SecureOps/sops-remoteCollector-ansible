@@ -2,22 +2,12 @@
 
 AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-east-1}"
 CUSTOMER_NAME="${CUSTOMER_NAME:-testClient}"
-REMOTE_NODE_NAME="${REMOTE_NODE_NAME:-test01}"
 CUSTOMER_PATH="/sops/customers/${CUSTOMER_NAME}/"
 STUNNEL_GW="${STUNEL_GW:-a.b.c.d:443}"
 
 INITIAL_USER_NAME="<foo>"
 INITIAL_USER_GECOS="<bar>"
 INITIAL_USER_SSH_KEY="<foo bar ssh public key>"
-
-## Agent VM Network information (Comment for DHCP)
-##  * MAC_ADDR is always required
-MAC_ADDR="x.x.x.x"
-IP_CIDR="x.x.x.x/y"
-GATEWAY="x.x.x.x"
-NAMESERVER[0]="a.a.a.a"
-NAMESERVER[1]="a.a.a.a"
-
 
 ###
 # CloudFormation Files
@@ -30,11 +20,5 @@ REMOTE_NODE_CF_FILE="createAWSResourcesCustomer_remotenode_cf.yaml"
 #
 ###
 
-if [[ $SCRIPT =~ "ISO" ]]; then
-  ## LOAD customer user access key only if we're creating an ISO
-  echo "Loading AWS secrets"
-  AWS_KEY_ID=$(aws secretsmanager get-secret-value --secret-id ${CUSTOMER_NAME}-${REMOTE_NODE_NAME}-RemoteNodeKey | jq -r '.SecretString' | jq -r '.access_key')
-  AWS_SEC_KEY=$(aws secretsmanager get-secret-value --secret-id ${CUSTOMER_NAME}-${REMOTE_NODE_NAME}-RemoteNodeKey | jq -r '.SecretString' | jq -r '.access_secret')
-fi
 
 

@@ -1,17 +1,27 @@
 #!/bin/bash
-set -e
 set -u
+
+## This script creates the following NODE specific resource:
+##  1) cloud-init ISO image
+##  2) stunnel client config file (uploaded to S3)
+##  3) text file containing remote loopback IP address used in autossh (uploaded to S3)
 
 ## LOAD required customer related vars
 SCRIPT=$( basename ${BASH_SOURCE[0]} )
 SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
 CF_DIR="${SCRIPT_DIR}/../CloudFormation/"
-#SCRIPT_DIR=$( readlink -f ${SCRIPT_DIR} )
 . ${SCRIPT_DIR}/../vars.sh
 
+# Load VARS FOR ESPECIFIC REMOTE NODE
+PS3="Select a node var file:"
+select NODE_VARS in ${SCRIPT_DIR}/../vars_${CUSTOMER_NAME}_nodes_*.sh 
+do
+  if [[ "${NODE_VARS}" != ""  ]] && [[ -f "${NODE_VARS}" ]] ; then break ; fi
+done
+. ${NODE_VARS}
 
 # Hostname
-TARGET_HOSTNAME="sopsCollector-${CUSTOMER_NAME}-${REMOTE_NODE_NAME:-01}"
+TARGET_HOSTNAME="sopsCollector-${CUSTOMER_NAME}-${REMOTE_NODE_NAME}"
 
 # Where to look for ansible playbook
 ANSIBLE_PULL_URL="https://github.com/SecureOps/sops-remoteCollector-ansible.git"
@@ -20,6 +30,13 @@ ANSIBLE_PULL_PLAYBOOK="collector-setup.yaml"
 
 # Phone Home Url, it's called when cloud-init is finished and also via cron every N mins (set in ansible)
 PHONE_HOME_URL="https://s3.amazonaws.com"
+
+
+## LOAD customer remove node access key 
+echo "Loading AWS secrets"
+AWS_KEY_ID=$(aws secretsmanager get-secret-value --secret-id ${CUSTOMER_NAME}-${REMOTE_NODE_NAME}-RemoteNodeKey | jq -r '.SecretString' | jq -r '.access_key')
+AWS_SEC_KEY=$(aws secretsmanager get-secret-value --secret-id ${CUSTOMER_NAME}-${REMOTE_NODE_NAME}-RemoteNodeKey | jq -r '.SecretString' | jq -r '.access_secret')
+
 
 # Some converted values
 CUSTOMER_LOWER=$(echo "${CUSTOMER_NAME}" | tr '[:upper:]' '[:lower:]')
@@ -151,7 +168,7 @@ mkisofs -output ${CUSTOMER_NAME}-ci-img.iso -volid cidata -joliet -rock ${TMPDIR
 ## alternative method ##-> cloud-localds -v --network-config=${TMPDIR}/network-config ${CUSTOMER_NAME}-ci-img.iso ${TMPDIR}/user-data ${TMPDIR}/meta-data
 
 
-# Create stunnel client config file
+# Create stunnel client config file and upload to S3
 cat <<EOF > "${TMPDIR}/${TARGET_HOSTNAME}-stunnel.conf"
 pid = /var/run/stunnel.pid
 [ssh-psk-client]
@@ -161,7 +178,12 @@ connect = ${STUNNEL_GW}
 ciphers = PSK
 PSKsecrets = /etc/stunnel/psk.txt
 EOF
-
 aws s3 cp "${TMPDIR}/${TARGET_HOSTNAME}-stunnel.conf" "s3://sopscustomer-${CUSTOMER_LOWER}/nodes/${REMOTE_NODE_NAME}/stunnel_client.conf"
 rm -f "${TMPDIR}/${TARGET_HOSTNAME}-stunnel.conf"
+
+# Create txt file with REMOTE LOOPBACK IP and upload to S3
+cat <<EOF > "${TMPDIR}/${TARGET_HOSTNAME}-remote_loopback_ip.conf"
+EOF
+aws s3 cp "${TMPDIR}/${TARGET_HOSTNAME}-remote_loopback_ip.conf" "s3://sopscustomer-${CUSTOMER_LOWER}/nodes/${REMOTE_NODE_NAME}/remote_loopback_ip.txt"
+rm -f "${TMPDIR}/${TARGET_HOSTNAME}-remote_loopback_ip.conf"
 

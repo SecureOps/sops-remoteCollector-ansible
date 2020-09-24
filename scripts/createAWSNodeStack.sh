@@ -7,6 +7,14 @@ SCRIPT_DIR=$( dirname ${BASH_SOURCE[0]} )
 CF_DIR="${SCRIPT_DIR}/../CloudFormation/"
 . ${SCRIPT_DIR}/../vars.sh
 
+# Load VARS FOR ESPECIFIC REMOTE NODE
+PS3="Select a node var file:"
+select NODE_VARS in ${SCRIPT_DIR}/../vars_${CUSTOMER_NAME}_nodes_*.sh 
+do
+  if [[ "${NODE_VARS}" != ""  ]] && [[ -f "${NODE_VARS}" ]] ; then break ; fi
+done
+. ${NODE_VARS}
+
 echo "Script Dir: ${SCRIPT_DIR}"
 echo "CloudFormation Dir: ${CF_DIR}"
 echo "Customer: ${CUSTOMER_NAME}"
