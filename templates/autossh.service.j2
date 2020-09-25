@@ -4,6 +4,9 @@ After=network.target
 
 [Service]
 User=ansible_poller
+Restart=on-failure
+RestartSec=5s
+StartLimitBurst=0
 # -p [PORT]
 # -l [user]
 # -M 0 --> no monitoring
