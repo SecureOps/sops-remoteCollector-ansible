@@ -54,6 +54,11 @@ def main():
     with open(args.aws_config, 'r') as aws_config_file:
         aws_config = json.load(aws_config_file)
 
+    for key, value in aws_config.items():
+        if not value:
+            print(f'Missing value for AWS config key: \'{key}\' in {args.aws_config}.')
+            exit()
+
     if args.kv and args.json_file:
         print('Only need to specify either --kv or --json.')
         exit()
@@ -100,11 +105,15 @@ def main():
 
     print(f'Fetching command output from S3 with message id {message_id}...')
     s3_bucket_name = aws_config['s3_bucket_name']
-    xml_filename, raw_xml, seconds_elapsed = wait_and_download_file_s3(s3_bucket_name, message_id)
+    filename, raw_output, seconds_elapsed = wait_and_download_file_s3(s3_bucket_name, message_id)
 
-    pretty_xml = xml_prettify(raw_xml)
-    print(pretty_xml)
-    print(f'^^^ Contents of {xml_filename} ^^^')
+    if not 'error' in filename:
+        pretty_xml = xml_prettify(raw_output)
+        print(pretty_xml)
+    else:
+        print(raw_output)
+
+    print(f'^^^ Contents of {filename} ^^^')
     print(f'Command took {seconds_elapsed}s to complete!')
 
 def create_sqs_command_from_template(json_template_json, variables_kv):
@@ -130,7 +139,7 @@ def wait_and_download_file_s3(bucket_name, expected_key):
 
     interesting_files = [
         f'{expected_key}-output.xml',
-        f'{expected_key}-error.xml'
+        f'{expected_key}-error.txt'
     ]
 
     seconds_elapsed = 0
