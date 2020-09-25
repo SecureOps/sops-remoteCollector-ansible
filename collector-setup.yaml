@@ -227,10 +227,12 @@
         state: "file"
       notify:
         - "Restart stunnel service"
+        - "Restart autossh service"
 
     - name: "stunnel psk file"
       notify:
         - "Restart stunnel service"
+        - "Restart autossh service"
       copy:
         owner: "root"
         group: "root"
