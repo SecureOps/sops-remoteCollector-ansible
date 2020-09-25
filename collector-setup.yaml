@@ -20,6 +20,12 @@
       shell: |
              yum -y config-manager --set-enabled PowerTools
 
+    - name: "Install Pre-req packages"
+      yum:
+        name: "epel-release"
+        state: "latest"
+        update_cache: "yes"
+
     - yum:
         name:  
           - "zip"
