@@ -133,7 +133,7 @@ def send_sqs_command(queue_url, message_attributes, command_json):
     )
     return response['MessageId']
 
-def wait_and_download_file_s3(bucket_name, expected_key):
+def wait_and_download_file_s3(bucket_name, expected_key, wait_seconds=1):
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(bucket_name)
 
@@ -165,7 +165,6 @@ def wait_and_download_file_s3(bucket_name, expected_key):
 
                 return interesting_file, command_output, seconds_elapsed
 
-        wait_seconds = 1
         time.sleep(wait_seconds)
         seconds_elapsed += wait_seconds
 
