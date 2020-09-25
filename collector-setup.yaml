@@ -237,7 +237,7 @@
         mode: "0600"
         dest: "/etc/stunnel/psk.txt"
         content: |
-                  sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}:{{ lookup('password', '/etc/stunnel/saved_passwd/local_gvm_admin_password length=128 chars=ascii_letters,digits' ) }}
+                  sopscustomer-{{ ansible_local.secureops.customer_info.name | lower }}-{{ ansible_local.secureops.customer_info.node | lower }}:{{ lookup('password', '/etc/stunnel/saved_passwd/local_gvm_admin_password length=128 chars=ascii_letters,digits' ) }}
 
     - name: "Upload psk to S3 bucket"
       aws_s3:
