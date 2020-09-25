@@ -13,6 +13,13 @@
         msg: "not supported"
       when: ( ansible_distribution not in ['CentOS'] )
 
+    - name: "Enable PowerTools repo"
+      ignore_errors: true
+      args:
+        executable: "/bin/bash"
+      shell: |
+             yum -y config-manager --set-enabled PowerTools
+
     - yum:
         name:  
           - "zip"
