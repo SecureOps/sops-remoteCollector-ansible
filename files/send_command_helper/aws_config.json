@@ -1,0 +1,6 @@
+{
+    "sqs_command_template": {},
+    "sqs_queue_url": "",
+    "sqs_message_attributes": {},
+    "s3_bucket_name": ""
+}
