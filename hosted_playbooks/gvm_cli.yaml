@@ -33,7 +33,7 @@
       args:
         executable: "/bin/bash"
       shell: |
-              /usr/local/bin/gvm-cli --timeout 300 --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock /tmp/ansible/{{ sqs_message_id | default('gvm-cli') }}-{{ scan_command }}.xml
+              /usr/local/bin/gvm-cli --timeout 600 --gmp-username=admin --gmp-password='{{ gvm_admin_pass }}' socket --socketpath /var/run/gvm/gvmd.sock /tmp/ansible/{{ sqs_message_id | default('gvm-cli') }}-{{ scan_command }}.xml
 
     - name: "Record the stdout to a file"
       when: ( scan_output.stdout|length > 0 )
