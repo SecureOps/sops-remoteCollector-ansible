@@ -131,58 +131,6 @@
     ######
 
     ######
-    ## Install and config SQL POLLER Service
-    ##
-    - name: "Set the SQS poller queue fact"
-      set_fact:
-        ansible_sqs_queue_url: "{{ node_template.cloudformation[tmp_node_stack_name].stack_outputs.AnsibleSQSCommandQueueUrl }}"
-        sqs_mask_node_name: "{{ ansible_local.secureops.customer_info.node }}"
-
-    - name: "Copy ansible poller configuration"
-      copy:
-        src: "files/ansible.cfg"
-        dest: "/home/ansible_poller/.ansible.cfg"
-        owner: "ansible_poller"
-        group: "ansible_poller"
-
-    - name: "Copy ansible poller"
-      copy:
-        src: "files/sqs_poller.py"
-        dest: "/home/ansible_poller/sqs_poller.py"
-        owner: "ansible_poller"
-        group: "ansible_poller"
-      notify:
-        - "Restart sqs_poller service"
-
-    - name: "Copy ansible poller service script"
-      copy:
-        src: "files/sqs_poller.service"
-        dest: "/etc/systemd/system/sqs_poller.service"
-        owner: "root"
-        group: "root"
-      notify:
-        - "Restart sqs_poller service"
-
-    - name: "Install the SQS Poller's config.json"
-      template:
-        src: "templates/sqs_poller.config.json.j2"
-        dest: "/home/ansible_poller/config.json"
-        owner: "ansible_poller"
-        group: "ansible_poller"
-      notify:
-        - "Restart sqs_poller service"
-
-    - name: "Install the sqs_poller service"
-      systemd:
-        name: "sqs_poller.service"
-        enabled: yes
-        daemon_reload: yes
-        state: "started"
-    ##
-    ##
-    ######
-
-    ######
     ## Generate SSH Key pair for ansible_poller
     ##
     - name: "block"
@@ -316,6 +264,59 @@
     ##
     ##
     ######
+
+    ######
+    ## Install and config SQL POLLER Service (This must be the last block to run)
+    ##
+    - name: "Set the SQS poller queue fact"
+      set_fact:
+        ansible_sqs_queue_url: "{{ node_template.cloudformation[tmp_node_stack_name].stack_outputs.AnsibleSQSCommandQueueUrl }}"
+        sqs_mask_node_name: "{{ ansible_local.secureops.customer_info.node }}"
+
+    - name: "Copy ansible poller configuration"
+      copy:
+        src: "files/ansible.cfg"
+        dest: "/home/ansible_poller/.ansible.cfg"
+        owner: "ansible_poller"
+        group: "ansible_poller"
+
+    - name: "Copy ansible poller"
+      copy:
+        src: "files/sqs_poller.py"
+        dest: "/home/ansible_poller/sqs_poller.py"
+        owner: "ansible_poller"
+        group: "ansible_poller"
+      notify:
+        - "Restart sqs_poller service"
+
+    - name: "Copy ansible poller service script"
+      copy:
+        src: "files/sqs_poller.service"
+        dest: "/etc/systemd/system/sqs_poller.service"
+        owner: "root"
+        group: "root"
+      notify:
+        - "Restart sqs_poller service"
+
+    - name: "Install the SQS Poller's config.json"
+      template:
+        src: "templates/sqs_poller.config.json.j2"
+        dest: "/home/ansible_poller/config.json"
+        owner: "ansible_poller"
+        group: "ansible_poller"
+      notify:
+        - "Restart sqs_poller service"
+
+    - name: "Install the sqs_poller service"
+      systemd:
+        name: "sqs_poller.service"
+        enabled: yes
+        daemon_reload: yes
+        state: "started"
+    ##
+    ##
+    ######
+
 
     - cron:
         name: "Set ansible-pull to run regularly"
