@@ -45,7 +45,13 @@ def main():
 
     if not os.path.exists(args.aws_config):
         print(f'AWS config file doesn\'t exist: {args.aws_config}')
-        required_keys = ['sqs_command_template', 'sqs_queue_url', 'sqs_message_attributes', 's3_bucket_name']
+        required_keys = [
+            'sqs_command_template',
+            'sqs_queue_url',
+            'sqs_message_attributes',
+            's3_bucket_name',
+            's3_bucket_folder_prefix'
+        ]
         joined_keys = '\n - '.join(required_keys)
         print(f'The following keys are needed: \n - {joined_keys}')
         exit()
@@ -86,6 +92,7 @@ def main():
         print('You must specify --cmd or have the key \'scan_command\' inside your --json_file or --kv.')
         exit()
 
+    s3_bucket_name = aws_config['s3_bucket_name']
     message_id = args.id
     if not message_id:
         command_kv = {}
@@ -98,14 +105,15 @@ def main():
 
         print('Sending command...')
         sqs_command_template = aws_config['sqs_command_template']
-        command_json = create_sqs_command_from_template(sqs_command_template, command_kv)
+        command_json = create_sqs_command_from_template(sqs_command_template, s3_bucket_name, command_kv)
+
         sqs_queue_url = aws_config['sqs_queue_url']
         sqs_message_attributes = aws_config['sqs_message_attributes']
         message_id = send_sqs_command(sqs_queue_url, sqs_message_attributes, command_json)
 
     print(f'Fetching command output from S3 with message id {message_id}...')
-    s3_bucket_name = aws_config['s3_bucket_name']
-    filename, raw_output, seconds_elapsed = wait_and_download_file_s3(s3_bucket_name, message_id)
+    s3_bucket_folder_prefix = aws_config['s3_bucket_folder_prefix']
+    filename, raw_output, seconds_elapsed = wait_and_download_file_s3(s3_bucket_name, s3_bucket_folder_prefix, message_id)
 
     if not 'error' in filename:
         pretty_xml = xml_prettify(raw_output)
@@ -116,8 +124,9 @@ def main():
     print(f'^^^ Contents of {filename} ^^^')
     print(f'Command took {seconds_elapsed}s to complete!')
 
-def create_sqs_command_from_template(json_template_json, variables_kv):
+def create_sqs_command_from_template(json_template_json, bucket_name, variables_kv):
     command = json_template_json
+    command['params']['variables']['scan_result_bucket'] = bucket_name
     for key, value in variables_kv.items():
         command['params']['variables'][key] = value
 
@@ -133,7 +142,7 @@ def send_sqs_command(queue_url, message_attributes, command_json):
     )
     return response['MessageId']
 
-def wait_and_download_file_s3(bucket_name, expected_key, wait_seconds=1):
+def wait_and_download_file_s3(bucket_name, folder_prefix, expected_key, wait_seconds=1):
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(bucket_name)
 
@@ -145,7 +154,7 @@ def wait_and_download_file_s3(bucket_name, expected_key, wait_seconds=1):
     seconds_elapsed = 0
     while True:
         all_filenames_in_s3 = {}
-        all_file_object_summaries = bucket.objects.all() # TODO: Only look in expected output folder instead of all
+        all_file_object_summaries = bucket.objects.filter(Prefix=folder_prefix)
         for file_object_summary in all_file_object_summaries:
             file_key = file_object_summary.key
             filename = file_key.split('/')[::-1][0]
