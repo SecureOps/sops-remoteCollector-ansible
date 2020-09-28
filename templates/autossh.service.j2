@@ -11,7 +11,9 @@ StartLimitBurst=0
 # -l [user]
 # -M 0 --> no monitoring
 # -N Just open the connection and do nothing (not interactive)
-ExecStart=/usr/bin/autossh -M 0 -N -q -i /home/ansible_poller/.ssh/id_ecdsa -o "StrictHostKeyChecking false" -o "ServerAliveInterval 60" -o "ServerAliveCountMax 3" -p 2222 -l {{ ansible_hostname }} localhost -R {{ _remote_loopback_ip }}:2222:localhost:22 -R {{ _remote_loopback_ip }}:8443:localhost:443 -R {{ _remote_loopback_ip }}:9090:localhost:9090 
+ExecStart=/usr/bin/autossh -M 0 -N -q -i /home/ansible_poller/.ssh/id_ecdsa -o "StrictHostKeyChecking false" -o "ServerAliveInterval 60" -o "ServerAliveCountMax 3" -p 2222 -l {{ ansible_local.secureops.customer_info.name | lower }}-{{ ansible_local.secureops.customer_info.node }} localhost -R {{ _remote_loopback_ip }}:2222:localhost:22 -R {{ _remote_loopback_ip }}:8443:localhost:443 -R {{ _remote_loopback_ip }}:9090:localhost:9090 
 
 [Install]
 WantedBy=multi-user.target
+
+
