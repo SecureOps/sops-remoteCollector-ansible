@@ -254,6 +254,7 @@
             owner: "root"
             group: "root"
           notify:
+            - "Restart autossh service"
 
         - name: "Install autossh service"
           systemd:
