@@ -164,7 +164,7 @@ fi
 set -u
 
 # generate the seed images
-mkisofs -output ${CUSTOMER_NAME}-${REMOTE_NODE_NAME}-ci-img.iso -volid cidata -joliet -rock ${TMPDIR}/
+mkisofs -output ${CUSTOMER_NAME}-${REMOTE_NODE_NAME}-${MAC_ADDR//:/}-ci.iso -volid cidata -joliet -rock ${TMPDIR}/
 ## alternative method ##-> cloud-localds -v --network-config=${TMPDIR}/network-config ${CUSTOMER_NAME}-ci-img.iso ${TMPDIR}/user-data ${TMPDIR}/meta-data
 
 
