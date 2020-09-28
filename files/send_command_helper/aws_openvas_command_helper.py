@@ -17,7 +17,7 @@ Requirements:
 
 Usage:
     $ python3 aws_openvas_command_helper.py --cmd get_configs
-    $ python3 aws_openvas_command_helper.py --cmd get_target --kv 'scan_target_id:0ace4c6a-95cd-4bf8-a869-a1643baecf78'
+    $ python3 aws_openvas_command_helper.py --cmd get_targets --kv 'scan_target_id:0ace4c6a-95cd-4bf8-a869-a1643baecf78'
     $ python3 aws_openvas_command_helper.py --cmd create_target --kv 'scan_target_label:test;scan_target_host_csv:192.168.0.0/24;scan_port_list_id:33d0cd82-57c6-11e1-8ed1-406186ea4fc5'
     $ python3 aws_openvas_command_helper.py --cmd create_target --json_file create_test_target.json
     $ python3 aws_openvas_command_helper.py --id 663a1122-7c77-49a7-9e2a-f74f267127e1
@@ -30,7 +30,7 @@ Workflow:
     $ python3 aws_openvas_command_helper.py --cmd create_target --json_file target_data.json
     $ python3 aws_openvas_command_helper.py --cmd create_task --json_file task_data.json
     $ python3 aws_openvas_command_helper.py --cmd start_task --kv 'scan_task_id:<TASK_ID>'
-    $ python3 aws_openvas_command_helper.py --cmd get_task --kv 'scan_task_id:<TASK_ID>' | grep -e '<status' -e '<progress'
+    $ python3 aws_openvas_command_helper.py --cmd get_tasks --kv 'scan_task_id:<TASK_ID>' | grep -e '<status' -e '<progress'
     $ python3 aws_openvas_command_helper.py --cmd get_report_formats
     $ python3 aws_openvas_command_helper.py --cmd get_reports --kv 'scan_report_id:<REPORT_ID>;scan_report_format_id:<CSV_FORMAT_ID>'
 '''
