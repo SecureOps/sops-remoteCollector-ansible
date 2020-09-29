@@ -121,7 +121,9 @@ create_credential
 **Variables**
 - scan_credential_label : Label to assign to the credentials
 - scan_credential_username : Username
-- scan_credential_password : Password
+- scan_credential_password : (Optional) Password
+- scan_ssh_private_key : (Optional) SSH private key used for authentication
+- scan_ssh_key_phrase : (Optional) Passphrase used to authenticate with the SSH private key
 
 ### Fetching available credentials
 **Scan Command**
