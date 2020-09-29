@@ -132,7 +132,7 @@ get_credentials
 
 **Variables**
 
-None
+- scan_credential_id : (Optional) ID of the credential to return.
 
 ## Targets
 ### Creating a target
@@ -175,7 +175,7 @@ create_task
 get_tasks
 
 **Variables**
-- scan_task_id : (Optional) ID of the scan_task to return.
+- scan_task_id : (Optional) ID of the task to return.
 
 ### Starting a task
 **Scan Command**
