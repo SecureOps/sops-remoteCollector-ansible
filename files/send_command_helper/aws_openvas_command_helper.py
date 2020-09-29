@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import base64
 import boto3
 import json
 import lxml.etree as etree
@@ -91,6 +92,24 @@ def main():
     if not args.id and not args.cmd and 'scan_command' not in input_kvs:
         print('You must specify --cmd or have the key \'scan_command\' inside your --json_file or --kv.')
         exit()
+
+    # Decode b64 if any keys have the magic b64 extension
+    magic_b64_key_extension = '.b64'
+    b64_keys_to_remove = []
+    decoded_key_values_to_add = {}
+    for key, value in input_kvs.items():
+        if key.endswith(magic_b64_key_extension):
+            b64_keys_to_remove.append(key)
+            new_key = key[:-len(magic_b64_key_extension)]
+            decoded_value = base64.b64decode(value).decode()
+            decoded_key_values_to_add[new_key] = decoded_value
+
+    # Add decoded b64 keys and values
+    input_kvs.update(decoded_key_values_to_add)
+
+    # Remove old b64 keys
+    for key in b64_keys_to_remove:
+        del input_kvs[key]
 
     s3_bucket_name = aws_config['s3_bucket_name']
     message_id = args.id
