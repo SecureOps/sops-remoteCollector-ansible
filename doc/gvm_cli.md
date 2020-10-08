@@ -18,6 +18,7 @@
  - [Fetching tasks](#fetching-tasks)
  - [Starting a task](#starting-a-task)
  - [Stopping a task](#stopping-a-task)
+ - [Resuming a task](#resuming-a-task)
 - [Reports](#reports)
  - [Fetching available report formats](#fetching-available-report-formats)
  - [Fetching CSV report for a task](#fetching-csv-report-for-a-task)
@@ -192,6 +193,15 @@ stop_task
 **Variables**
 
 scan_task_id : ID of the task to stop
+
+### Resuming a task
+**Scan Command**
+
+resume_task
+
+**Variables**
+
+scan_task_id : ID of the task to resume
 
 ## Reports
 
