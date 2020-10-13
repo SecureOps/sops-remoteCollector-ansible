@@ -13,4 +13,7 @@
    {% if scan_esxi_credential_id is defined %}
    <esxi_credential id="{{ scan_esxi_credential_id }}"/>
    {% endif %}
+   {% if scan_alive_tests is defined %}
+   <alive_tests>{{ scan_alive_tests }}</alive_tests>
+   {% endif %}
 </create_target>
