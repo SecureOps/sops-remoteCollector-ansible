@@ -148,6 +148,8 @@ create_target
 - scan_ssh_credential_id : (Optional) ID assigned to an SSH credential
 - scan_smb_credential_id : (Optional) ID assigned to an SMB credential
 - scan_esxi_credential_id : (Optional) ID assigned to an ESXI credential
+- scan_alive_tests : (Optional) Alive tests to use for the target (e.g.: "ICMP, TCP Service & ARP Ping|TCP Service & ARP Ping|I↵
+CMP & ARP Ping|ICMP & TCP Service Ping|ARP Ping|TCP Service Ping|ICMP Ping|Scan Config Default"
 
 ### Fetching available targets
 **Scan Command**
